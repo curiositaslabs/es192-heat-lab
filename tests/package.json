@@ -1,0 +1,12 @@
+{
+  "name": "heat-lab-tests",
+  "private": true,
+  "description": "Checks for ES 192 Heat Lab: physics numbers (plain node) and browser tests (headless Chrome via puppeteer-core).",
+  "scripts": {
+    "test": "node physics-test.js && node ui-test.js",
+    "shots": "node shots.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^23.11.1"
+  }
+}

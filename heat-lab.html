@@ -1,0 +1,1234 @@
+<title>ES 192 Heat Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a lab bench, as in the Crystal Lab. A slim bar of tabs on top; the live model fills the screen
+   height beside a scrolling instrument column. Stacks on phones. */
+:root {
+  --paper: #f3f5f8; --panel: #ffffff; --ink: #17212c; --muted: #586473; --rule: #d3dae2; --soft: #e9edf2;
+  --stage: #e4e9ef; --stage2: #f6f8fb;
+  --accent: #a51c30;   /* Harvard crimson: lane A, selected items */
+  --teal: #1d7486;     /* lane B */
+  --amber: #b97d0c;
+  --good: #2f7d4a;
+  --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 2px 8px rgba(16, 24, 40, .07);
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --barH: 56px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1318; --panel: #151c24; --ink: #e5eaf0; --muted: #9ba7b5; --rule: #29323d; --soft: #1d252f;
+    --stage: #090d12; --stage2: #141b23; --accent: #e25a6f; --teal: #4fb4c6; --amber: #e2a93b; --good: #5cbf7c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 2px 10px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0e1318; --panel: #151c24; --ink: #e5eaf0; --muted: #9ba7b5; --rule: #29323d; --soft: #1d252f;
+  --stage: #090d12; --stage2: #141b23; --accent: #e25a6f; --teal: #4fb4c6; --amber: #e2a93b; --good: #5cbf7c;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 2px 10px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, input, select { font-family: inherit; }
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.bar { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--paper) 90%, transparent); backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--rule); }
+.bar .in { max-width: 1680px; margin: 0 auto; padding: 0 16px; min-height: var(--barH); display: flex; align-items: center; gap: 18px; }
+.brand { font: 800 21px/1 var(--display); letter-spacing: -0.015em; color: var(--ink); text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 9px; }
+.brand span { color: var(--accent); }
+.brand svg { width: 24px; height: 24px; flex: none; }
+nav.tabs { display: flex; gap: 2px; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; padding: 6px 2px; }
+nav.tabs::-webkit-scrollbar { display: none; }
+nav.tabs button { font: 600 14.5px/1 var(--body); color: var(--muted); background: transparent; border: 0; border-radius: 8px; padding: 9px 12px 9px 9px; display: inline-flex; gap: 8px; align-items: center; white-space: nowrap; cursor: pointer; flex: none; }
+nav.tabs button .n { font: 600 11px/1 var(--mono); width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--rule); color: var(--muted); background: var(--panel); }
+nav.tabs button:hover { color: var(--ink); background: var(--soft); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); background: var(--panel); box-shadow: var(--shadow); }
+nav.tabs button[aria-selected="true"] .n { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tools { display: flex; gap: 6px; flex: none; margin-left: auto; }
+.ibtn { height: 34px; min-width: 34px; padding: 0 9px; display: inline-grid; grid-auto-flow: column; gap: 6px; place-items: center; border-radius: 8px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); cursor: pointer; font: 600 13.5px/1 var(--body); }
+.ibtn:hover { border-color: var(--muted); }
+.ibtn:disabled { opacity: .35; cursor: default; }
+.ibtn svg { width: 17px; height: 17px; }
+.ibtn[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+@media (max-width: 1180px) { #presentBtn .lbl { display: none; } }
+@media (max-width: 760px) {
+  .bar .in { flex-wrap: wrap; gap: 0 12px; padding-top: 8px; }
+  nav.tabs { order: 3; flex-basis: 100%; padding: 6px 0 8px; margin: 0 -4px; }
+  .brand { font-size: 19px; }
+}
+
+main.wrap { max-width: 1680px; margin: 0 auto; padding: 14px 16px 20px; }
+.bench { display: grid; grid-template-columns: minmax(0, 1fr) clamp(330px, 28vw, 410px); gap: 18px; height: calc(100vh - var(--barH) - 30px); height: calc(100dvh - var(--barH) - 30px); min-height: 580px; }
+.bench > .stage { height: 100%; min-height: 0; }
+.bench > .side { overflow-y: auto; min-height: 0; padding: 0 8px 16px 2px; scrollbar-width: thin; display: flex; flex-direction: column; gap: 16px; }
+@media (max-width: 960px) {
+  .bench { grid-template-columns: minmax(0, 1fr); height: auto; min-height: 0; }
+  .bench > .stage { height: min(92vh, 820px); min-height: 560px; }
+  .bench > .side { overflow: visible; padding: 0; }
+}
+.stage { background: radial-gradient(120% 90% at 30% 20%, var(--stage2), var(--stage)); border: 1px solid var(--rule); border-radius: 12px; position: relative; overflow: hidden; min-width: 0; display: flex; flex-direction: column; }
+.stage > .box { position: relative; flex: 1 1 0; min-height: 0; min-width: 0; }
+.stage > .box + .box { border-top: 1px solid var(--rule); }
+.box > canvas { position: absolute; left: 0; top: 0; display: block; }
+.box.cross > canvas { cursor: crosshair; touch-action: none; }
+.box.click > canvas { cursor: pointer; }
+.hud { position: absolute; left: 10px; top: 10px; z-index: 2; margin: 0; display: grid; grid-template-columns: max-content auto; gap: 1px 12px; font: 13px/1.5 var(--mono); background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid var(--rule); border-radius: 8px; padding: 7px 11px; pointer-events: none; max-width: calc(100% - 20px); font-variant-numeric: tabular-nums; }
+.hud dt { color: var(--muted); }
+.hud dd { margin: 0; font-weight: 600; }
+.hud.tr { left: auto; right: 10px; }
+.capbar { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 2; margin: 0; font: 600 15px/1.35 var(--body); background: color-mix(in srgb, var(--panel) 90%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 8px; padding: 8px 12px; pointer-events: none; }
+.tip { position: absolute; z-index: 3; pointer-events: none; font: 12.5px/1.4 var(--mono); background: var(--panel); border: 1px solid var(--rule); border-radius: 7px; padding: 6px 9px; box-shadow: var(--shadow); white-space: nowrap; }
+
+.sidehead h2 { margin: 0; font: 800 22px/1.15 var(--display); letter-spacing: -0.01em; }
+.desc { margin: 6px 0 0; font-size: 15.5px; line-height: 1.5; }
+h3 { font: 700 11.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 7px; }
+.group { display: flex; flex-direction: column; gap: 7px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 600 14px/1.2 var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 7px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+.chip:hover:not(:disabled) { border-color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip:disabled { opacity: .38; cursor: not-allowed; }
+.chip.go { background: var(--accent); color: #fff; border-color: var(--accent); }
+.chip.go:hover:not(:disabled) { filter: brightness(1.08); border-color: var(--accent); }
+.chip.sm { font-size: 13px; padding: 5px 10px; border-radius: 7px; }
+.chip svg { width: 15px; height: 15px; flex: none; }
+.seg { display: grid; gap: 3px; padding: 3px; background: var(--soft); border: 1px solid var(--rule); border-radius: 10px; }
+.seg.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.seg > button { border: 0; background: transparent; border-radius: 7px; padding: 7px 8px; font: 600 13.5px/1.2 var(--body); color: var(--muted); cursor: pointer; text-align: center; min-width: 0; }
+.seg > button:hover { color: var(--ink); }
+.seg > button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 0 0 1px var(--rule); }
+.range { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; }
+.range label { font-weight: 600; font-size: 14.5px; }
+.range output { font: 600 13px var(--mono); color: var(--accent); font-variant-numeric: tabular-nums; }
+.range input { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); margin: 4px 0 0; }
+.lanes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lane label { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.lane label i { width: 10px; height: 10px; border-radius: 50%; }
+select { width: 100%; font-size: 14px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); }
+.readout { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 15px; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-family: var(--mono); font-size: 13.5px; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere; }
+table.cmp { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+table.cmp th { text-align: left; font-weight: 600; color: var(--muted); padding: 3px 4px; font-size: 13px; }
+table.cmp td { padding: 3px 4px; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 13px; }
+table.cmp td:first-child { font-family: var(--body); color: var(--muted); font-size: 13.5px; }
+table.cmp th.a { color: var(--accent); } table.cmp th.b { color: var(--teal); }
+.rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.rank li { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: baseline; padding: 5px 8px; border-radius: 7px; background: var(--panel); border: 1px solid var(--rule); font-size: 14px; cursor: pointer; }
+.rank li b { font: 600 12px var(--mono); color: var(--muted); }
+.rank li span.v { font: 600 12.5px var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+.rank li.out { opacity: .45; }
+.rank li.sel { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.rank li small { display: block; color: var(--muted); font-size: 12.5px; }
+.status { font-weight: 600; }
+.status.ok { color: var(--good); } .status.bad { color: var(--accent); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.cap { font-size: 13px; color: var(--muted); line-height: 1.45; margin: 0; }
+.calc { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; }
+.calc input { font: 600 14px var(--mono); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); width: 100%; }
+details.about { border-top: 1px solid var(--rule); padding-top: 10px; }
+details.about summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--muted); }
+details.about[open] summary { color: var(--ink); }
+details.about > div { display: grid; gap: 8px; margin-top: 8px; }
+
+.explore { background: var(--panel); border: 1px solid var(--rule); border-top: 3px solid var(--accent); border-radius: 10px; padding: 10px 13px 12px; display: grid; gap: 9px; }
+.exhead { display: flex; align-items: center; gap: 6px; }
+.exhead h3 { margin: 0; color: var(--accent); }
+.exhead .exn { font: 600 12px var(--mono); color: var(--muted); margin-left: auto; margin-right: 2px; }
+.exhead .ibtn { height: 28px; min-width: 28px; padding: 0 6px; }
+.exhead .ibtn svg { width: 15px; height: 15px; }
+.exdots { display: flex; gap: 4px; }
+.exdots i { width: 7px; height: 7px; border-radius: 50%; background: var(--rule); }
+.exdots i.on { background: var(--accent); }
+.exq { font-weight: 600; font-size: 15.5px; line-height: 1.45; margin: 0; }
+.exbtns { display: flex; flex-wrap: wrap; gap: 6px; }
+.exa { font-size: 14.5px; line-height: 1.45; background: var(--soft); border-radius: 8px; padding: 8px 11px; margin: 0; }
+
+body.present { font-size: 18px; }
+body.present .capbar { font-size: 18px; }
+body.present .hud { font-size: 15px; }
+</style>
+
+<header class="bar">
+  <div class="in">
+    <a class="brand" href="#chip" aria-label="ES 192 Heat Lab home"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="6" width="26" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 21c3-8 5 2 8-6s5 2 8-6" fill="none" stroke="#a51c30" stroke-width="2.4" stroke-linecap="round"/></svg>ES 192 <span>Heat Lab</span></a>
+    <nav class="tabs" role="tablist" aria-label="Benches">
+      <button role="tab" id="t-chip" data-tab="chip" aria-selected="true" aria-controls="p-chip"><span class="n">1</span>Chip heat sink</button>
+      <button role="tab" id="t-wall" data-tab="wall" aria-selected="false" aria-controls="p-wall"><span class="n">2</span>Steady or changing?</button>
+      <button role="tab" id="t-flash" data-tab="flash" aria-selected="false" aria-controls="p-flash"><span class="n">3</span>Laser flash</button>
+      <button role="tab" id="t-chart" data-tab="chart" aria-selected="false" aria-controls="p-chart"><span class="n">4</span>Selection chart</button>
+    </nav>
+    <div class="tools">
+      <button class="ibtn" id="themeBtn" title="Switch between light and dark" aria-label="Switch between light and dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      <button class="ibtn" id="presentBtn" aria-pressed="false" title="Present mode: full screen, larger text (key P)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg><span class="lbl">Present</span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ 1 CHIP ============ -->
+  <section class="tabpanel" id="p-chip" role="tabpanel" aria-labelledby="t-chip">
+    <div class="bench">
+      <div class="stage">
+        <div class="box" style="flex:1.25 1 0">
+          <canvas id="chipCv" aria-label="Cross-section: a chip on a heat-sink plate, coloured by temperature"></canvas>
+          <dl class="hud">
+            <dt>Heat flux q</dt><dd id="chipQ">–</dd>
+            <dt>Rise across plate</dt><dd id="chipDT">–</dd>
+            <dt>Chip temperature</dt><dd id="chipT">–</dd>
+          </dl>
+        </div>
+        <div class="box click">
+          <canvas id="chipBars" aria-label="Thermal conductivity of each plate material, log scale; click a bar to choose it"></canvas>
+          <p class="capbar" id="chipCap" aria-live="polite">–</p>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="sidehead">
+          <h2>Cool a chip without shorting it</h2>
+          <p class="desc">A 10 W chip sits on a 1 mm² pad over a thin plate whose back face is held at 30 °C. Choose the plate. <b>Screen</b> first (it must not conduct electricity), then <b>rank</b> on conductivity λ.</p>
+        </div>
+        <div class="explore" data-guide="chip"></div>
+        <div class="group">
+          <h3>Plate material</h3>
+          <div class="chips" id="chipMats"></div>
+        </div>
+        <div class="range">
+          <label for="chipX">Plate thickness</label><output id="chipXOut">2.0 mm</output>
+          <input type="range" id="chipX" min="0.5" max="5" step="0.1" value="2">
+        </div>
+        <div class="range">
+          <label for="chipP">Chip power</label><output id="chipPOut">10 W</output>
+          <input type="range" id="chipP" min="1" max="20" step="1" value="10">
+        </div>
+        <div class="readout">
+          <dl class="kv">
+            <dt>Screen</dt><dd id="chipScreen">–</dd>
+            <dt>Fourier</dt><dd>ΔT = q·X / λ</dd>
+            <dt>λ</dt><dd id="chipLam">–</dd>
+          </dl>
+        </div>
+        <p class="cap">One-dimensional estimate: all the heat goes straight down through the plate under the chip. Real plates also spread heat sideways, so real rises are smaller, but the ranking does not change. Silicon chips are usually rated to about 125–150 °C.</p>
+        <details class="about"><summary>About this model</summary><div>
+          <p class="cap">Fourier's law for a flat plate: q = λ ΔT / X, so ΔT = q X / λ with q = P / A. The numbers follow the lecture's worked example (Ashby, <em>Materials Selection in Mechanical Design</em> 6e, Exercise E2.22 and §5.18): 10 W on 1 mm², 2 mm plate, back face at 30 °C.</p>
+          <p class="cap">Conductivities: copper, aluminum and polystyrene from Callister &amp; Rethwisch 10e, Table 19.1; AlN 170 and alumina 33 W/m·K are mid-range values from Ashby Table A.6 (140–200 and 26–39); glass 1.1 W/m·K from Ashby p. 37.</p>
+        </div></details>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ 2 WALL ============ -->
+  <section class="tabpanel" id="p-wall" role="tabpanel" aria-labelledby="t-wall" hidden>
+    <div class="bench">
+      <div class="stage">
+        <div class="box" style="flex:1.1 1 0">
+          <canvas id="wallCv" aria-label="Two walls side by side, coloured by temperature through their thickness"></canvas>
+          <dl class="hud tr"><dt>Time</dt><dd id="wallTHud">–</dd></dl>
+        </div>
+        <div class="box">
+          <canvas id="wallPlot" aria-label="Inside temperature or heat leak against time, log time axis"></canvas>
+          <p class="capbar" id="wallCap" aria-live="polite">–</p>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="sidehead">
+          <h2>Steady or still changing?</h2>
+          <p class="desc">The outside of a wall changes suddenly. If the heat flow has settled (<b>steady</b>), conductivity λ decides how much leaks through. While the temperatures are <b>still changing</b>, diffusivity <i>a</i> = λ/ρC<sub>p</sub> decides how fast the change creeps across: the front reaches about √(2<i>at</i>).</p>
+        </div>
+        <div class="explore" data-guide="wall"></div>
+        <div class="lanes">
+          <div class="lane"><label for="wallA"><i style="background:var(--accent)"></i>Wall A</label><select id="wallA"></select></div>
+          <div class="lane"><label for="wallB"><i style="background:var(--teal)"></i>Wall B</label><select id="wallB"></select></div>
+        </div>
+        <div class="range">
+          <label for="wallW">Wall thickness w</label><output id="wallWOut">20 mm</output>
+          <input type="range" id="wallW" min="0" max="2.3" step="0.005" value="1.301">
+        </div>
+        <div class="range">
+          <label for="wallDT">Outside changes by</label><output id="wallDTOut">−30 °C</output>
+          <input type="range" id="wallDT" min="-40" max="80" step="5" value="-30">
+        </div>
+        <div class="group">
+          <h3>The far side of the wall</h3>
+          <div class="seg g2" id="wallMode">
+            <button data-v="sealed" aria-pressed="true">Sealed box</button>
+            <button data-v="held">Held at 20 °C</button>
+          </div>
+        </div>
+        <div class="range">
+          <label for="wallT">Time since the change</label><output id="wallTOut">1 h</output>
+          <input type="range" id="wallT" min="-1" max="5.3" step="0.005" value="3.556">
+        </div>
+        <div class="chips"><button class="chip go" id="wallPlay">Play</button><button class="chip" id="wallZero">Back to t = 0</button></div>
+        <div class="readout"><table class="cmp" id="wallTable"></table></div>
+        <details class="about"><summary>About this model</summary><div>
+          <p class="cap">A flat wall starts at 20 °C. At t = 0 its outside face jumps to the new temperature and stays there. <b>Sealed box</b>: nothing removes heat from the inside face (the contents are small), so the inside drifts towards the outside temperature. <b>Held at 20 °C</b>: a heater or cooler keeps the inside face at 20 °C, and the plot shows the heat it must remove per square metre.</p>
+          <p class="cap">The temperatures are exact solutions of the one-dimensional heat equation (Fourier series, with image sums at short times), not a rough animation. "Halfway" is the moment the inside has moved half the way (sealed), or the leak has reached half its steady value (held).</p>
+          <p class="cap">The estimate t ≈ w²/2a (Ashby, <em>MSMD</em> 6e, Eq. 2.15) is an order-of-magnitude guide: the exact halfway time is about 0.76 w²/2a for a sealed wall and 0.28 w²/2a for a held one. Both grow with the thickness squared.</p>
+          <p class="cap" id="wallSrc"></p>
+        </div></details>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ 3 FLASH ============ -->
+  <section class="tabpanel" id="p-flash" role="tabpanel" aria-labelledby="t-flash" hidden>
+    <div class="bench">
+      <div class="stage">
+        <div class="box" style="flex:0.85 1 0">
+          <canvas id="flashCv" aria-label="A thin disc: a laser flash heats the front face, an infrared detector watches the back face"></canvas>
+          <dl class="hud tr"><dt>Time</dt><dd id="flashTHud">–</dd></dl>
+        </div>
+        <div class="box cross">
+          <canvas id="flashPlot" aria-label="Back-face temperature rise against time. Click the curve to read the time."></canvas>
+          <div class="tip" id="flashTip" hidden></div>
+          <p class="capbar" id="flashCap" aria-live="polite">–</p>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="sidehead">
+          <h2>Measure diffusivity: flash one face, time the other</h2>
+          <p class="desc">Fire a short laser pulse at the front of a thin disc. The back face warms and levels off. Read <b>t½</b>, the time to reach half the final rise. Then <i>a</i> ≈ 0.139 L²/t½ and λ = <i>a</i>ρC<sub>p</sub>.</p>
+        </div>
+        <div class="explore" data-guide="flash"></div>
+        <div class="group">
+          <h3>Sample</h3>
+          <div class="chips" id="flashMats"></div>
+          <p class="cap" id="flashGiven"></p>
+        </div>
+        <div class="range">
+          <label for="flashL">Disc thickness L</label><output id="flashLOut">2.0 mm</output>
+          <input type="range" id="flashL" min="0.5" max="5" step="0.1" value="2">
+        </div>
+        <div class="chips"><button class="chip go" id="flashFire">Fire the flash</button></div>
+        <div class="readout">
+          <h3 style="margin:0">Your measurement</h3>
+          <p class="cap">Click the curve where it crosses 50 % (or type the time).</p>
+          <div class="calc"><input id="flashIn" type="number" step="any" min="0" placeholder="t½ in seconds" aria-label="Your t-half in seconds"><button class="chip sm" id="flashCheck">Check</button></div>
+          <dl class="kv">
+            <dt>a = 0.139 L²/t½</dt><dd id="flashA">–</dd>
+            <dt>λ = a ρ C<sub>p</sub></dt><dd id="flashLam">–</dd>
+          </dl>
+          <p class="status" id="flashStatus" aria-live="polite"></p>
+        </div>
+        <details class="about"><summary>About this model</summary><div>
+          <p class="cap">The curve is Parker's exact solution for an instantaneous pulse on one face of a disc that loses no heat (W. J. Parker et al., <em>J. Appl. Phys.</em> 32, 1679, 1961): the back face reaches half its final rise at t½ = 1.388 L²/(π² a) = 0.139 L²/a. A little detector noise is added so the reading feels like data.</p>
+          <p class="cap">Real instruments correct for heat lost from the faces and for the pulse length; this model leaves them out. Property data: alumina, AlN and copper as on the Chip bench; glass from Ashby p. 37; Mystery X from Callister Table 19.1 and Appendix B.</p>
+        </div></details>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ 4 CHART ============ -->
+  <section class="tabpanel" id="p-chart" role="tabpanel" aria-labelledby="t-chart" hidden>
+    <div class="bench">
+      <div class="stage">
+        <div class="box cross">
+          <canvas id="chartCv" aria-label="Thermal conductivity against thermal diffusivity, log scales, with a movable selection line"></canvas>
+          <div class="tip" id="chartTip" hidden></div>
+          <p class="capbar" id="chartCap" aria-live="polite">–</p>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="sidehead">
+          <h2>One chart, four thermal decisions</h2>
+          <p class="desc">Conductivity λ against diffusivity <i>a</i>. Pick the design goal: the chart draws its index as a selection line and greys out materials that fail the constraint. Drag the slider to move the line.</p>
+        </div>
+        <div class="explore" data-guide="chart"></div>
+        <div class="group">
+          <h3>Design goal</h3>
+          <div class="seg g2" id="chartGoal">
+            <button data-v="months" aria-pressed="true">Insulate for months</button>
+            <button data-v="hour">Insulate for an hour</button>
+            <button data-v="store">Store the day's heat</button>
+            <button data-v="kiln">Kiln wall</button>
+          </div>
+        </div>
+        <div class="readout">
+          <dl class="kv">
+            <dt>Index</dt><dd id="chartIdx">–</dd>
+            <dt>Constraint</dt><dd id="chartCon">–</dd>
+          </dl>
+        </div>
+        <div class="range">
+          <label for="chartLine">Move the selection line</label><output id="chartLineOut">–</output>
+          <input type="range" id="chartLine" min="0" max="1" step="0.001" value="0.5">
+        </div>
+        <div class="group">
+          <h3>Ranking</h3>
+          <ol class="rank" id="chartRank"></ol>
+        </div>
+        <details class="about"><summary>About this chart</summary><div>
+          <p class="cap">Each dot is one representative value, not the full property range an Ashby chart shows. The dashed diagonals are lines of constant volumetric heat capacity ρC<sub>p</sub> = λ/a: most dense solids sit near 3 MJ/m³·K, foams far below.</p>
+          <p class="cap">Indices from Ashby, <em>MSMD</em> 6e, Table C.7 and §§5.13–5.15: short-term insulation, minimize <i>a</i>; storing heat in a wall that heat crosses in 12 h, maximize λ/a<sup>½</sup> with a ≤ 3 × 10⁻⁶ m²/s; kiln wall, maximize a<sup>½</sup>/λ at 1000 °C. Costs per m³ for the solar wall are from Table 5.26. Maximum service temperatures are approximate.</p>
+          <p class="cap" id="chartSrc"></p>
+        </div></details>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* =================================================================== helpers */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const SUP = { "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+function sci(x, d = 2) {
+  if (!isFinite(x)) return "–";
+  if (x === 0) return "0";
+  const e = Math.floor(Math.log10(Math.abs(x)));
+  if (e >= -2 && e <= 3) return (+x.toPrecision(d)).toString();
+  const m = x / Math.pow(10, e);
+  return m.toFixed(d - 1) + " × 10" + String(e).split("").map(c => SUP[c]).join("");
+}
+function num(x, d = 2) { return (+x.toPrecision(d)).toLocaleString("en-US").replace("-", "−"); }
+const fixed = (x, d) => (x < 0 ? "−" : "") + Math.abs(x).toFixed(d);
+function niceTicks(lo, hi, n = 4) {
+  const raw = (hi - lo) / n, e = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / e;
+  const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e, out = [];
+  for (let v = Math.ceil(lo / step - 1e-9) * step; v <= hi + 1e-9; v += step) out.push(+v.toPrecision(6));
+  return out;
+}
+/* room the caption bar takes at the bottom of a stage box */
+const capSpace = cv => { const c = cv.parentElement.querySelector(".capbar"); return c ? c.offsetHeight + 12 : 0; };
+function fmtTime(s) {
+  if (!isFinite(s)) return "–";
+  if (s < 0.01) return num(s * 1000, 2) + " ms";
+  if (s < 1) return num(s, 2) + " s";
+  if (s < 60) return num(s, s < 10 ? 2 : 2) + " s";
+  if (s < 3600) return num(s / 60, 2) + " min";
+  if (s < 2 * 86400) return num(s / 3600, 2) + " h";
+  return num(s / 86400, 2) + " days";
+}
+function fitCanvas(cv) {
+  const r = cv.parentElement.getBoundingClientRect();
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = Math.max(20, Math.floor(r.width)), H = Math.max(20, Math.floor(r.height));
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    cv.style.width = W + "px"; cv.style.height = H + "px";
+  }
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  return { ctx, W, H };
+}
+function pal() {
+  return { ink: cssv("--ink"), muted: cssv("--muted"), rule: cssv("--rule"), panel: cssv("--panel"), soft: cssv("--soft"),
+    accent: cssv("--accent"), teal: cssv("--teal"), amber: cssv("--amber"), good: cssv("--good"), paper: cssv("--paper") };
+}
+const FONT = (w, s) => w + " " + s + "px 'Source Sans 3', system-ui, sans-serif";
+const MONO = s => "600 " + s + "px 'JetBrains Mono', ui-monospace, monospace";
+
+/* Temperature colour: blue (cold) – pale (room) – amber – crimson (hot). Data colours are the same in both themes. */
+const TSTOPS = [[-40, [38, 84, 150]], [0, [92, 145, 200]], [20, [236, 230, 218]], [60, [236, 160, 70]], [150, [205, 70, 50]], [400, [140, 18, 40]], [1000, [70, 8, 20]]];
+function tColor(T) {
+  if (T <= TSTOPS[0][0]) return "rgb(" + TSTOPS[0][1] + ")";
+  for (let i = 1; i < TSTOPS.length; i++) {
+    if (T <= TSTOPS[i][0]) {
+      const [t0, c0] = TSTOPS[i - 1], [t1, c1] = TSTOPS[i], f = (T - t0) / (t1 - t0);
+      return "rgb(" + c0.map((c, k) => Math.round(c + (c1[k] - c) * f)).join(",") + ")";
+    }
+  }
+  return "rgb(" + TSTOPS[TSTOPS.length - 1][1] + ")";
+}
+function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function arrow(ctx, x0, y0, x1, y1, head = 7) {
+  const a = Math.atan2(y1 - y0, x1 - x0);
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - head * Math.cos(a - 0.45), y1 - head * Math.sin(a - 0.45));
+  ctx.lineTo(x1 - head * Math.cos(a + 0.45), y1 - head * Math.sin(a + 0.45)); ctx.closePath(); ctx.fill();
+}
+
+/* =================================================================== physics (tested by tests/physics-test.js) */
+/*PHYSICS-START*/
+function erfc(x) { // Abramowitz & Stegun 7.1.26, |error| < 1.5e-7
+  const z = Math.abs(x), t = 1 / (1 + 0.3275911 * z);
+  const y = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429)))) * Math.exp(-z * z);
+  return x >= 0 ? y : 2 - y;
+}
+const FO_SWITCH = 0.05; // below this Fourier number use image sums, above it Fourier series
+/* Slab 0 <= xi <= 1 (xi = x/w), initially theta = 0. At Fo = a t / w^2 > 0 the face xi = 0 is held at theta = 1.
+   sealed: no heat crosses xi = 1.  held: xi = 1 stays at theta = 0. */
+function slabTheta(xi, Fo, sealed) {
+  if (Fo <= 0) return xi <= 0 ? 1 : 0;
+  if (Fo < FO_SWITCH) {
+    const s = 2 * Math.sqrt(Fo); let th = 0;
+    for (let m = 0; m < 4; m++) {
+      if (sealed) th += (m % 2 ? -1 : 1) * (erfc((2 * m + xi) / s) + erfc((2 * m + 2 - xi) / s));
+      else th += erfc((2 * m + xi) / s) - erfc((2 * m + 2 - xi) / s);
+    }
+    return th;
+  }
+  let s = 0;
+  if (sealed) {
+    for (let n = 0; n < 400; n++) { const k = (2 * n + 1) * Math.PI / 2, e = Math.exp(-k * k * Fo); if (e < 1e-14) break; s += (2 / k) * Math.sin(k * xi) * e; }
+    return 1 - s;
+  }
+  for (let n = 1; n < 400; n++) { const k = n * Math.PI, e = Math.exp(-k * k * Fo); if (e < 1e-14) break; s += (2 / k) * Math.sin(k * xi) * e; }
+  return (1 - xi) - s;
+}
+/* Held slab: heat flux leaving the far face divided by its steady value. The same function is Parker's
+   back-face rise after a flash on an adiabatic disc. */
+function farFlux(Fo) {
+  if (Fo <= 0) return 0;
+  if (Fo < FO_SWITCH) { let s = 0; for (let m = 0; m < 4; m++) s += Math.exp(-((2 * m + 1) ** 2) / (4 * Fo)); return 2 / Math.sqrt(Math.PI * Fo) * s; }
+  let s = 1; for (let n = 1; n < 400; n++) { const e = Math.exp(-n * n * Math.PI * Math.PI * Fo); if (e < 1e-14) break; s += 2 * (n % 2 ? -1 : 1) * e; }
+  return s;
+}
+const parker = farFlux;
+/* Flash: instantaneous pulse on face xi = 0 of an adiabatic disc; temperature rise / final uniform rise. */
+function flashTheta(xi, Fo) {
+  if (Fo <= 0) return 0;
+  if (Fo < FO_SWITCH) { let s = 0; for (let m = -3; m <= 3; m++) s += Math.exp(-((xi - 2 * m) ** 2) / (4 * Fo)); return s / Math.sqrt(Math.PI * Fo); }
+  let s = 1; for (let n = 1; n < 400; n++) { const e = Math.exp(-n * n * Math.PI * Math.PI * Fo); if (e < 1e-14) break; s += 2 * Math.cos(n * Math.PI * xi) * e; }
+  return s;
+}
+function solveFo(f, target) { let lo = 1e-6, hi = 10; for (let i = 0; i < 90; i++) { const mid = Math.sqrt(lo * hi); if (f(mid) < target) lo = mid; else hi = mid; } return Math.sqrt(lo * hi); }
+const FO_HALF_SEALED = solveFo(F => slabTheta(1, F, true), 0.5);
+const FO_HALF_HELD = solveFo(farFlux, 0.5); // = Parker's 0.1388
+
+/* Property data: one representative value each. lam W/m.K, rho kg/m3, cp J/kg.K, tmax approx. max service C. */
+const MATS = {
+  cu:        { name: "Copper", lam: 398, rho: 8940, cp: 386, cls: "metal", elec: true, tmax: 200, src: "Callister T19.1, B.1" },
+  al:        { name: "Aluminum", lam: 247, rho: 2710, cp: 900, cls: "metal", elec: true, tmax: 150, src: "Callister T19.1, B.1" },
+  steel:     { name: "Carbon steel", lam: 51.9, rho: 7850, cp: 486, cls: "metal", elec: true, tmax: 400, src: "Callister T19.1 (1025 steel)" },
+  ss:        { name: "Stainless steel", lam: 15.9, rho: 8000, cp: 502, cls: "metal", elec: true, tmax: 800, src: "Callister T19.1 (316)" },
+  ti:        { name: "Titanium alloy", lam: 7.0, rho: 4430, cp: 560, cls: "metal", elec: true, tmax: 450, cost: 200000, src: "typical Ti-6Al-4V" },
+  aln:       { name: "Aluminum nitride", short: "AlN", lam: 170, rho: 3260, cp: 740, cls: "ceramic", elec: false, tmax: 1200, src: "Ashby T A.6 (λ 140–200)" },
+  alumina:   { name: "Alumina", lam: 33, rho: 3980, cp: 775, cls: "ceramic", elec: false, tmax: 1500, src: "Ashby T A.6 (λ 26–39); Callister Cp" },
+  glass:     { name: "Soda-lime glass", short: "Glass", lam: 1.1, rho: 2450, cp: 800, cls: "glass", elec: false, tmax: 450, cost: 10000, src: "Ashby p. 37" },
+  stone:     { name: "Stone (granite)", lam: 3.0, rho: 2650, cp: 790, cls: "build", elec: false, tmax: 500, cost: 1400, src: "typical" },
+  concrete:  { name: "Concrete", lam: 2.0, rho: 2300, cp: 850, cls: "build", elec: false, tmax: 400, cost: 200, src: "typical" },
+  brick:     { name: "Brick", lam: 0.7, rho: 1800, cp: 840, cls: "build", elec: false, tmax: 1000, cost: 1400, src: "typical" },
+  adobe:     { name: "Adobe", lam: 0.8, rho: 1600, cp: 900, cls: "build", elec: false, tmax: 600, cost: 100, costTxt: "0–200", src: "typical" },
+  firebrick: { name: "Refractory brick", lam: 0.20, rho: 500, cp: 900, cls: "build", elec: false, tmax: 1400, src: "typical insulating firebrick" },
+  aerated:   { name: "Aerated concrete", lam: 0.30, rho: 700, cp: 1000, cls: "build", elec: false, tmax: 1100, src: "typical (high-temperature grade)" },
+  ps:        { name: "Polystyrene", lam: 0.13, rho: 1050, cp: 1170, cls: "polymer", elec: false, tmax: 80, src: "Callister T19.1" },
+  neoprene:  { name: "Neoprene", lam: 0.12, rho: 1240, cp: 2000, cls: "polymer", elec: false, tmax: 100, src: "typical; a ≈ 5 × 10⁻⁸ as read in Ashby §5.13" },
+  cork:      { name: "Cork", lam: 0.045, rho: 160, cp: 1900, cls: "foam", elec: false, tmax: 120, src: "typical" },
+  psfoam:    { name: "Polystyrene foam", lam: 0.035, rho: 30, cp: 1300, cls: "foam", elec: false, tmax: 80, src: "typical rigid foam" },
+  mystery:   { name: "Mystery X", lam: 15.9, rho: 8000, cp: 502, cls: "metal", elec: true, tmax: 800, hidden: true, real: "316 stainless steel", src: "Callister T19.1, B.1" }
+};
+for (const k in MATS) { const m = MATS[k]; m.id = k; m.a = m.lam / (m.rho * m.cp); m.rhocp = m.rho * m.cp; }
+/*PHYSICS-END*/
+
+/* =================================================================== tabs, theme, present, explore */
+const tabs = {}; let active = "chip";
+function activate(name) {
+  if (!tabs[name]) name = "chip";
+  active = name;
+  $$("nav.tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === name ? "true" : "false"));
+  $$(".tabpanel").forEach(p => { p.hidden = p.id !== "p-" + name; });
+  requestAnimationFrame(() => tabs[name].draw());
+}
+$$("nav.tabs button").forEach(b => b.addEventListener("click", () => { history.replaceState(null, "", "#" + b.dataset.tab); activate(b.dataset.tab); }));
+window.addEventListener("resize", () => { if (tabs[active]) tabs[active].draw(); });
+$("#themeBtn").addEventListener("click", () => {
+  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.dataset.theme = dark ? "light" : "dark";
+  tabs[active].draw();
+});
+function setPresent(on) {
+  document.body.classList.toggle("present", on); $("#presentBtn").setAttribute("aria-pressed", on ? "true" : "false");
+  try {
+    if (on && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  } catch (e) {}
+  setTimeout(() => tabs[active].draw(), 160);
+}
+$("#presentBtn").addEventListener("click", () => setPresent(!document.body.classList.contains("present")));
+document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && document.body.classList.contains("present")) setPresent(false); });
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input, select, textarea")) return;
+  if (e.key === "p" || e.key === "P") setPresent(!document.body.classList.contains("present"));
+  if (e.key >= "1" && e.key <= "4") { const n = ["chip", "wall", "flash", "chart"][+e.key - 1]; history.replaceState(null, "", "#" + n); activate(n); }
+});
+function seg(host, onPick) {
+  host.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; set(b.dataset.v); onPick(b.dataset.v); });
+  function set(v) { $$("button", host).forEach(x => x.setAttribute("aria-pressed", x.dataset.v === v ? "true" : "false")); }
+  return set;
+}
+
+const ICON = {
+  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>',
+  prev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>'
+};
+const guides = {};
+function mountGuide(name, items) {
+  const host = $('[data-guide="' + name + '"]');
+  host.setAttribute("role", "region"); host.setAttribute("aria-label", "Explore questions");
+  host.innerHTML = '<div class="exhead"><h3>Explore</h3><div class="exdots" aria-hidden="true"></div><span class="exn"></span>' +
+    '<button class="ibtn" data-x="link" title="Copy a link that opens this question, set up">' + ICON.link + '</button>' +
+    '<button class="ibtn" data-x="prev" aria-label="Previous question">' + ICON.prev + '</button>' +
+    '<button class="ibtn" data-x="next" aria-label="Next question">' + ICON.next + '</button></div>' +
+    '<p class="exq" aria-live="polite"></p>' +
+    '<div class="exbtns"><button class="chip go sm" data-x="setup">Set it up</button><button class="chip sm" data-x="ans" aria-expanded="false">Show answer</button></div>' +
+    '<p class="exa" hidden></p>';
+  let i = 0;
+  const q = $(".exq", host), a = $(".exa", host), ans = $('[data-x="ans"]', host), setupB = $('[data-x="setup"]', host);
+  function render() {
+    const it = items[i];
+    $(".exn", host).textContent = (i + 1) + " / " + items.length;
+    $(".exdots", host).innerHTML = items.map((_, k) => '<i class="' + (k === i ? "on" : "") + '"></i>').join("");
+    q.textContent = it.q; a.textContent = it.a; a.hidden = true;
+    ans.textContent = "Show answer"; ans.setAttribute("aria-expanded", "false");
+    setupB.textContent = "Set it up";
+    $('[data-x="prev"]', host).disabled = i === 0; $('[data-x="next"]', host).disabled = i === items.length - 1;
+  }
+  function setup() { items[i].setup(); setupB.textContent = "Set up ✓"; }
+  host.addEventListener("click", e => {
+    const b = e.target.closest("[data-x]"); if (!b) return;
+    const x = b.dataset.x;
+    if (x === "prev" && i > 0) { i--; render(); }
+    if (x === "next" && i < items.length - 1) { i++; render(); }
+    if (x === "setup") setup();
+    if (x === "ans") { a.hidden = !a.hidden; ans.textContent = a.hidden ? "Show answer" : "Hide answer"; ans.setAttribute("aria-expanded", a.hidden ? "false" : "true"); }
+    if (x === "link") {
+      const url = location.href.split("#")[0] + "#" + name + ":" + (i + 1);
+      const done = () => { b.title = "Link copied"; b.style.color = "var(--teal)"; setTimeout(() => { b.style.color = ""; b.title = "Copy a link that opens this question, set up"; }, 1500); };
+      try { navigator.clipboard.writeText(url).then(done, () => prompt("Link to this question:", url)); } catch (err) { prompt("Link to this question:", url); }
+    }
+  });
+  guides[name] = { go(k, run) { i = clamp(k, 0, items.length - 1); render(); if (run) setup(); }, get index() { return i; }, get count() { return items.length; } };
+  render();
+}
+
+/* =================================================================== 1 CHIP */
+tabs.chip = (() => {
+  const LIST = ["cu", "al", "aln", "alumina", "glass", "ps"];
+  const st = { mat: "aln", X: 2, P: 10 };
+  const A = 1e-6, TBACK = 30;
+  const host = $("#chipMats");
+  host.innerHTML = LIST.map(k => '<button class="chip" data-m="' + k + '" aria-pressed="false">' + MATS[k].name + '</button>').join("");
+  host.addEventListener("click", e => { const b = e.target.closest("button"); if (b) set({ mat: b.dataset.m }); });
+  $("#chipX").addEventListener("input", e => set({ X: +e.target.value }));
+  $("#chipP").addEventListener("input", e => set({ P: +e.target.value }));
+  let bars = [];
+  $("#chipBars").addEventListener("click", e => {
+    const r = e.target.getBoundingClientRect(), y = e.clientY - r.top;
+    const hit = bars.find(b => y >= b.y0 && y <= b.y1); if (hit) set({ mat: hit.k });
+  });
+  const rise = (k, s = st) => (s.P / A) * (s.X / 1000) / MATS[k].lam;
+  function set(p) {
+    Object.assign(st, p);
+    $("#chipX").value = st.X; $("#chipP").value = st.P;
+    $("#chipXOut").textContent = st.X.toFixed(1) + " mm"; $("#chipPOut").textContent = st.P + " W";
+    $$("button", host).forEach(b => b.setAttribute("aria-pressed", b.dataset.m === st.mat ? "true" : "false"));
+    draw();
+  }
+  function tTxt(T) { return T > 2000 ? "> 2000 °C" : Math.round(T) + " °C"; }
+  function draw() {
+    const m = MATS[st.mat], q = st.P / A, dT = rise(st.mat), Tc = TBACK + dT;
+    $("#chipQ").textContent = sci(q, 2) + " W/m²";
+    $("#chipDT").textContent = num(dT, 3) + " °C";
+    $("#chipT").textContent = tTxt(Tc);
+    $("#chipLam").textContent = num(m.lam, 3) + " W/m·K";
+    $("#chipScreen").innerHTML = m.elec ? '<span class="status bad">fails: conducts electricity</span>' : '<span class="status ok">passes: electrical insulator</span>';
+    let cap;
+    if (m.elec) cap = m.name + " would keep the chip at " + tTxt(Tc) + ", but it conducts electricity: the chip's contacts short through the plate. Screened out.";
+    else if (Tc <= 150) cap = m.name + ": chip at " + tTxt(Tc) + ". Insulator, and λ = " + num(m.lam, 3) + " W/m·K carries the heat away. Within a typical silicon limit.";
+    else cap = m.name + ": insulator, but λ = " + num(m.lam, 3) + " W/m·K is too low: the chip reaches " + tTxt(Tc) + " and fails.";
+    $("#chipCap").textContent = cap;
+    drawSection(m, Tc); drawBars();
+  }
+  function drawSection(m, Tc) {
+    const { ctx, W, H } = fitCanvas($("#chipCv")); const c = pal();
+    const nar = W < 620, gx = W - (nar ? 96 : 120), plateL = Math.max(16, W * 0.06), plateR = gx - (nar ? 20 : 40);
+    const plateH = 16 + st.X * 22, plateT = Math.max(150, H * 0.5 - plateH / 2 + 10), plateB = plateT + plateH;
+    const cx = (plateL + plateR) / 2, chipW = Math.min(150, (plateR - plateL) * 0.34), chipH = 26;
+    // cold base
+    ctx.fillStyle = tColor(TBACK - 25); rr(ctx, plateL - 6, plateB, plateR - plateL + 12, 12, 3); ctx.fill();
+    ctx.fillStyle = c.muted; ctx.font = FONT(600, 13); ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.fillText(nar ? "back face 30 °C" : "back face held at 30 °C (cooled)", cx, plateB + 17);
+    // plate: hot column under the chip, gradient top -> bottom
+    const g = ctx.createLinearGradient(0, plateT, 0, plateB);
+    g.addColorStop(0, tColor(Tc)); g.addColorStop(1, tColor(TBACK));
+    ctx.fillStyle = tColor(TBACK + 0.15 * (Tc - TBACK)); ctx.fillRect(plateL, plateT, plateR - plateL, plateH);
+    ctx.fillStyle = g; ctx.fillRect(cx - chipW / 2, plateT, chipW, plateH);
+    ctx.strokeStyle = c.ink; ctx.lineWidth = 1.2; ctx.strokeRect(plateL, plateT, plateR - plateL, plateH);
+    ctx.fillStyle = c.ink; ctx.font = FONT(700, 14); ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillText(nar ? st.X.toFixed(1) + " mm" : m.name + " plate, X = " + st.X.toFixed(1) + " mm", plateL + 8, plateT + Math.min(14, plateH / 2));
+    // heat arrows down through the column
+    ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 2;
+    for (let i = -1; i <= 1; i++) { const x = cx + i * chipW * 0.3; arrow(ctx, x, plateT + 6, x, plateB - 4, 7); }
+    // chip + pads
+    const chipT = plateT - chipH - 6;
+    ctx.fillStyle = "#2b2f36"; rr(ctx, cx - chipW / 2, chipT, chipW, chipH, 4); ctx.fill();
+    ctx.fillStyle = tColor(Tc); rr(ctx, cx - chipW / 2 + 6, chipT + 6, chipW - 12, chipH - 12, 3); ctx.fill();
+    ctx.fillStyle = "#c9a227";
+    const padX = [cx - chipW / 2 + 8, cx + chipW / 2 - 22];
+    padX.forEach(x => ctx.fillRect(x, plateT - 6, 14, 6));
+    ctx.fillStyle = c.ink; ctx.font = FONT(600, 12.5); ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    ctx.fillText("chip: " + st.P + " W through 1 mm²", cx, chipT - 8);
+    // electrical screen graphic
+    const ey = plateT + 3;
+    if (m.elec) {
+      ctx.strokeStyle = "#ffd23f"; ctx.lineWidth = 3; ctx.beginPath();
+      const x0 = padX[0] + 7, x1 = padX[1] + 7, n = 8;
+      ctx.moveTo(x0, ey);
+      for (let i = 1; i < n; i++) ctx.lineTo(x0 + (x1 - x0) * i / n, ey + (i % 2 ? 9 : 1));
+      ctx.lineTo(x1, ey); ctx.stroke();
+      ctx.fillStyle = c.accent; ctx.font = FONT(700, 14); ctx.textAlign = "center"; ctx.textBaseline = "top";
+      ctx.fillText(nar ? "⚡ current shorts" : "⚡ current shorts through the metal", cx, plateB + 38);
+    } else {
+      ctx.fillStyle = c.good; ctx.font = FONT(700, 14); ctx.textAlign = "center"; ctx.textBaseline = "top";
+      ctx.fillText(nar ? "✓ insulator" : "✓ no current path: the plate is an insulator", cx, plateB + 38);
+    }
+    // thermometer
+    const tx = gx + 30, tTop = nar ? 132 : 56, tBot = H - 46, Tmax = 700;
+    const ty = T => tBot - (clamp(T, 0, Tmax) / Tmax) * (tBot - tTop);
+    ctx.fillStyle = c.soft; rr(ctx, tx - 9, tTop - 4, 18, tBot - tTop + 8, 9); ctx.fill();
+    ctx.fillStyle = "rgba(165,28,48,.18)"; ctx.fillRect(tx - 9, ty(150), 18, ty(125) - ty(150));
+    const fillTop = ty(Tc);
+    ctx.fillStyle = tColor(Tc); rr(ctx, tx - 6, fillTop, 12, tBot - fillTop, 6); ctx.fill();
+    ctx.beginPath(); ctx.arc(tx, tBot + 10, 13, 0, 7); ctx.fill();
+    ctx.strokeStyle = c.rule; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(tx, tBot + 10, 13, 0, 7); ctx.stroke();
+    ctx.fillStyle = c.muted; ctx.font = MONO(11); ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    [0, 100, 200, 300, 400, 500, 600, 700].forEach(T => { ctx.fillText(T, tx - 14, ty(T)); });
+    ctx.textAlign = "left"; ctx.fillStyle = c.accent; ctx.font = FONT(600, 12);
+    ctx.fillText("silicon", tx + 13, ty(150) - 2); ctx.fillText("limit", tx + 13, ty(150) + 11);
+    ctx.fillStyle = c.ink; ctx.font = MONO(13); ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    ctx.fillText(Tc > 700 ? "off scale" : Math.round(Tc) + " °C", tx, tTop - 8);
+  }
+  function drawBars() {
+    const { ctx, W, H } = fitCanvas($("#chipBars")); const c = pal();
+    const nar = W < 620, L = nar ? 92 : Math.min(170, W * 0.3), R = W - (nar ? 84 : 110), T = 34, B = H - capSpace($("#chipBars")) - 26;
+    const lx = v => L + (Math.log10(v) + 1) / 4 * (R - L); // 0.1 .. 1000
+    ctx.font = FONT(700, 12); ctx.fillStyle = c.muted; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+    ctx.fillText(nar ? "λ (W/m·K), LOG" : "THERMAL CONDUCTIVITY λ (W/m·K), log scale", L, 20);
+    ctx.textAlign = "right"; ctx.fillText("CHIP TEMP.", W - 12, 20);
+    [0.1, 1, 10, 100, 1000].forEach(v => {
+      const x = lx(v); ctx.strokeStyle = c.rule; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, T - 4); ctx.lineTo(x, B + 4); ctx.stroke();
+      ctx.fillStyle = c.muted; ctx.font = MONO(11); ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText(v, x, B + 7);
+    });
+    const n = LIST.length, rowH = (B - T) / n; bars = [];
+    LIST.forEach((k, i) => {
+      const m = MATS[k], y = T + i * rowH, h = Math.min(22, rowH * 0.62), yc = y + rowH / 2, sel = k === st.mat;
+      bars.push({ k, y0: y, y1: y + rowH });
+      if (sel) { ctx.fillStyle = c.soft; ctx.fillRect(4, y + 1, W - 8, rowH - 2); }
+      ctx.fillStyle = sel ? c.ink : c.muted; ctx.font = FONT(sel ? 700 : 600, 14); ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      ctx.fillText(nar ? (m.short || m.name) : m.name, L - 10, yc);
+      ctx.globalAlpha = m.elec ? 0.35 : 1;
+      ctx.fillStyle = m.elec ? c.muted : (sel ? c.accent : c.teal);
+      ctx.fillRect(L, yc - h / 2, lx(m.lam) - L, h);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = c.ink; ctx.font = MONO(12); ctx.textAlign = "left";
+      ctx.fillText(num(m.lam, 3), lx(m.lam) + 6, yc);
+      if (m.elec) { ctx.font = FONT(700, 12.5); ctx.fillStyle = c.ink; ctx.fillText(nar ? "screened out" : "conducts current: screened out", L + 8, yc); }
+      const Tc = TBACK + rise(k);
+      ctx.textAlign = "right"; ctx.fillStyle = m.elec ? c.muted : (Tc <= 150 ? c.good : c.accent); ctx.font = MONO(12.5);
+      ctx.fillText(m.elec ? "–" : tTxt(Tc), W - 12, yc);
+    });
+  }
+  set({});
+  return { draw, set, st };
+})();
+
+/* =================================================================== 2 WALL */
+tabs.wall = (() => {
+  const LIST = ["psfoam", "cork", "neoprene", "ps", "glass", "brick", "concrete", "stone", "steel", "al", "cu"];
+  const T0 = 20, TMIN = -1, TMAX = 5.3;
+  const st = { a: "psfoam", b: "neoprene", w: 20, dT: -30, sealed: true, t: 3600 };
+  const opts = LIST.map(k => '<option value="' + k + '">' + MATS[k].name + '</option>').join("");
+  $("#wallA").innerHTML = opts; $("#wallB").innerHTML = opts;
+  $("#wallSrc").textContent = "Property values: " + LIST.map(k => MATS[k].name + " " + MATS[k].src).join("; ") + ".";
+  $("#wallA").addEventListener("change", e => set({ a: e.target.value }));
+  $("#wallB").addEventListener("change", e => set({ b: e.target.value }));
+  $("#wallW").addEventListener("input", e => set({ w: +Math.pow(10, +e.target.value).toPrecision(2) }));
+  $("#wallDT").addEventListener("input", e => set({ dT: +e.target.value }));
+  $("#wallT").addEventListener("input", e => { stop(); set({ t: Math.pow(10, +e.target.value) }); });
+  const setMode = seg($("#wallMode"), v => set({ sealed: v === "sealed" }));
+  let raf = null;
+  $("#wallPlay").addEventListener("click", () => {
+    if (raf) { stop(); return; }
+    let lt = st.t > 0 ? Math.log10(st.t) : TMIN; if (lt < TMIN || lt >= TMAX - 0.01) lt = TMIN;
+    const t0 = performance.now(), l0 = lt, dur = 9000 * (TMAX - l0) / (TMAX - TMIN);
+    $("#wallPlay").textContent = "Pause";
+    const step = now => {
+      const f = Math.min(1, (now - t0) / dur);
+      set({ t: Math.pow(10, l0 + f * (TMAX - l0)) });
+      if (f < 1) raf = requestAnimationFrame(step); else stop();
+    };
+    raf = requestAnimationFrame(step);
+  });
+  $("#wallZero").addEventListener("click", () => { stop(); set({ t: 0 }); });
+  function stop() { if (raf) cancelAnimationFrame(raf); raf = null; $("#wallPlay").textContent = "Play"; }
+  const lane = k => {
+    const m = MATS[k], w = st.w / 1000, Fo = st.t * m.a / (w * w);
+    const qss = m.lam * Math.abs(st.dT) / w;
+    const tHalf = (st.sealed ? FO_HALF_SEALED : FO_HALF_HELD) * w * w / m.a;
+    return { m, w, Fo, qss, tHalf, est: w * w / (2 * m.a), front: Math.sqrt(2 * m.a * st.t),
+      inside: T0 + st.dT * slabTheta(1, Fo, true), leak: qss * farFlux(Fo) };
+  };
+  function set(p) {
+    Object.assign(st, p);
+    $("#wallA").value = st.a; $("#wallB").value = st.b;
+    $("#wallW").value = Math.log10(st.w); $("#wallWOut").textContent = num(st.w, 2) + " mm";
+    $("#wallDT").value = st.dT; $("#wallDTOut").textContent = (st.dT > 0 ? "+" : st.dT < 0 ? "−" : "") + Math.abs(st.dT) + " °C";
+    $("#wallT").value = st.t > 0 ? Math.log10(st.t) : TMIN; $("#wallTOut").textContent = st.t > 0 ? fmtTime(st.t) : "0 (just changed)";
+    setMode(st.sealed ? "sealed" : "held");
+    draw();
+  }
+  function table(A, B) {
+    const row = (h, f) => "<tr><td>" + h + "</td><td>" + f(A) + "</td><td>" + f(B) + "</td></tr>";
+    $("#wallTable").innerHTML = '<tr><th></th><th class="a">A ' + A.m.name + '</th><th class="b">B ' + B.m.name + '</th></tr>' +
+      row("λ (W/m·K)", L => num(L.m.lam, 3)) +
+      row("a (m²/s)", L => sci(L.m.a, 2)) +
+      row("Steady leak λ|ΔT|/w", L => num(L.qss, 2) + " W/m²") +
+      row("Estimate w²/2a", L => fmtTime(L.est)) +
+      row(st.sealed ? "Inside halfway at" : "Leak halfway at", L => fmtTime(L.tHalf));
+  }
+  function draw() {
+    const A = lane(st.a), B = lane(st.b);
+    table(A, B);
+    $("#wallTHud").textContent = st.t > 0 ? fmtTime(st.t) : "0";
+    const Tout = T0 + st.dT;
+    if (st.dT === 0) $("#wallCap").textContent = "Set a temperature change to start.";
+    else if (st.sealed) {
+      const first = A.tHalf < B.tHalf ? A : B, slow = first === A ? B : A;
+      $("#wallCap").textContent = "Sealed: " + first.m.name + "'s inside is halfway to " + Tout + " °C after " + fmtTime(first.tHalf) + "; " + slow.m.name + " holds out " + num(slow.tHalf / first.tHalf, 2) + "× longer (" + fmtTime(slow.tHalf) + "). Lower a, longer delay.";
+    } else {
+      const lo = A.qss < B.qss ? A : B, hi = lo === A ? B : A;
+      $("#wallCap").textContent = "Held: once steady, " + lo.m.name + " leaks " + num(lo.qss, 2) + " W/m², " + hi.m.name + " " + num(hi.qss, 2) + " W/m² (" + num(hi.qss / lo.qss, 2) + "× more). Lower λ, smaller leak.";
+    }
+    drawLanes(A, B, Tout); drawPlot(A, B, Tout);
+  }
+  function drawLanes(A, B, Tout) {
+    const { ctx, W, H } = fitCanvas($("#wallCv")); const c = pal();
+    const narrow = W < 560, outW = narrow ? 64 : 96, inW = narrow ? 92 : 130;
+    const sL = 14 + outW + 6, sR = W - 14 - inW - 6, top = 12, gap = 16;
+    const laneH = (H - top - 12 - gap) / 2;
+    const Tnow = st.t > 0 ? Tout : T0;
+    const Tlo = Math.min(T0, Tout), Thi = Math.max(T0, Tout);
+    [[A, c.accent, "A"], [B, c.teal, "B"]].forEach(([L, col, tag], i) => {
+      const y0 = top + i * (laneH + gap), sy = y0 + 26, sh = laneH - 30;
+      ctx.fillStyle = col; ctx.font = FONT(700, 14.5); ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      ctx.fillText(tag + "  " + L.m.name, sL, y0 + 10);
+      if (!narrow) { ctx.fillStyle = c.muted; ctx.font = MONO(12); ctx.textAlign = "right";
+        ctx.fillText("w = " + num(st.w, 2) + " mm · a = " + sci(L.m.a, 2) + " m²/s", sR, y0 + 10); }
+      // outside
+      ctx.fillStyle = tColor(Tnow); rr(ctx, 14, sy, outW, sh, 6); ctx.fill();
+      ctx.fillStyle = Math.abs(Tnow - 20) > 45 ? "#fff" : "#1b2430"; ctx.textAlign = "center"; ctx.font = FONT(600, 12.5);
+      ctx.fillText("outside", 14 + outW / 2, sy + sh / 2 - 10); ctx.font = MONO(13); ctx.fillText(fixed(Tnow, 0) + " °C", 14 + outW / 2, sy + sh / 2 + 9);
+      // slab
+      const N = Math.max(40, Math.floor((sR - sL) / 3)), dx = (sR - sL) / N, temps = [];
+      for (let j = 0; j <= N; j++) temps.push(T0 + st.dT * slabTheta(j / N, L.Fo, st.sealed));
+      for (let j = 0; j < N; j++) { ctx.fillStyle = tColor((temps[j] + temps[j + 1]) / 2); ctx.fillRect(sL + j * dx, sy, dx + 0.6, sh); }
+      ctx.strokeStyle = c.ink; ctx.lineWidth = 1.2; ctx.strokeRect(sL, sy, sR - sL, sh);
+      // profile line
+      if (Thi > Tlo) {
+        const py = T => sy + sh - 8 - (T - Tlo) / (Thi - Tlo) * (sh - 16);
+        const pathP = () => { ctx.beginPath(); temps.forEach((T, j) => { const x = sL + j * dx, y = py(T); j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); };
+        ctx.lineJoin = "round"; pathP(); ctx.strokeStyle = "rgba(0,0,0,.55)"; ctx.lineWidth = 4.5; ctx.stroke();
+        pathP(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+      }
+      // front marker
+      if (st.t > 0) {
+        const xf = L.front / L.w;
+        ctx.font = FONT(700, 12); ctx.textBaseline = "top";
+        if (xf <= 1) {
+          const x = sL + xf * (sR - sL);
+          ctx.setLineDash([5, 4]); ctx.strokeStyle = c.ink; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x, sy - 2); ctx.lineTo(x, sy + sh + 2); ctx.stroke(); ctx.setLineDash([]);
+          const lbl = "front ≈ √(2at)"; ctx.font = FONT(700, 12); const tw = ctx.measureText(lbl).width;
+          const lx = clamp(x + 5, sL + 2, sR - tw - 8);
+          ctx.fillStyle = "rgba(255,255,255,.88)"; rr(ctx, lx - 3, sy + 4, tw + 6, 17, 4); ctx.fill();
+          ctx.fillStyle = "#1b2430"; ctx.textAlign = "left"; ctx.fillText(lbl, lx, sy + 6);
+        } else {
+          const lbl = "front has crossed: √(2at) > w"; const tw = ctx.measureText(lbl).width;
+          ctx.fillStyle = "rgba(255,255,255,.88)"; rr(ctx, sR - tw - 12, sy + 4, tw + 6, 17, 4); ctx.fill();
+          ctx.fillStyle = "#1b2430"; ctx.textAlign = "left"; ctx.fillText(lbl, sR - tw - 9, sy + 6);
+        }
+      }
+      // inside
+      const ix = W - 14 - inW;
+      if (st.sealed) {
+        ctx.fillStyle = tColor(L.inside); rr(ctx, ix, sy, inW, sh, 6); ctx.fill();
+        ctx.strokeStyle = c.ink; ctx.lineWidth = 1.2; rr(ctx, ix, sy, inW, sh, 6); ctx.stroke();
+        ctx.fillStyle = Math.abs(L.inside - 20) > 45 ? "#fff" : "#1b2430"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = FONT(600, 12.5);
+        ctx.fillText("sealed inside", ix + inW / 2, sy + sh / 2 - 12); ctx.font = MONO(15); ctx.fillText(fixed(L.inside, 1) + " °C", ix + inW / 2, sy + sh / 2 + 9);
+      } else {
+        ctx.fillStyle = tColor(T0); rr(ctx, ix, sy, inW, sh, 6); ctx.fill();
+        ctx.fillStyle = "#1b2430"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = FONT(600, 12.5);
+        ctx.fillText("held at 20 °C", ix + inW / 2, sy + sh / 2 - 16);
+        ctx.font = MONO(13); ctx.fillText("leak " + num(st.t > 0 ? L.leak : 0, 2), ix + inW / 2, sy + sh / 2 + 4);
+        ctx.font = FONT(600, 12); ctx.fillText("W/m²", ix + inW / 2, sy + sh / 2 + 21);
+      }
+    });
+  }
+  function drawPlot(A, B, Tout) {
+    const { ctx, W, H } = fitCanvas($("#wallPlot")); const c = pal();
+    const L = 64, R = W - 22, T = 28, Bm = H - capSpace($("#wallPlot")) - 40, narrow = W < 620;
+    const lx = s => L + (Math.log10(s) - TMIN) / (TMAX - TMIN) * (R - L);
+    let ylo, yhi, val, ylab;
+    if (st.sealed) { ylo = Math.min(T0, Tout); yhi = Math.max(T0, Tout); if (yhi === ylo) { yhi += 1; ylo -= 1; } val = (Lx, t) => T0 + st.dT * slabTheta(1, t * Lx.m.a / (Lx.w * Lx.w), true); ylab = "Inside temperature (°C)"; }
+    else { ylo = 0; yhi = Math.max(A.qss, B.qss, 1e-9) * 1.12; val = (Lx, t) => Lx.qss * farFlux(t * Lx.m.a / (Lx.w * Lx.w)); ylab = "Heat leak at the inside (W/m²)"; }
+    const ly = v => Bm - (v - ylo) / (yhi - ylo) * (Bm - T);
+    ctx.font = FONT(700, 12); ctx.fillStyle = c.muted; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.fillText(ylab.toUpperCase(), L, 18);
+    // grid
+    const ticks = [[0.1, "0.1 s"], [1, "1 s"], [10, "10 s"], [60, "1 min"], [600, "10 min"], [3600, "1 h"], [36000, "10 h"], [86400, "1 day"]];
+    ctx.lineWidth = 1;
+    (narrow ? ticks.filter(t => [1, 60, 3600, 86400].includes(t[0])) : ticks).forEach(([s, lab]) => { const x = lx(s); ctx.strokeStyle = c.rule; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, Bm); ctx.stroke(); ctx.fillStyle = c.muted; ctx.font = MONO(11); ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText(lab, x, Bm + 6); });
+    niceTicks(ylo, yhi, 4).forEach(v => { const y = ly(v); ctx.strokeStyle = c.rule; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke(); ctx.fillStyle = c.muted; ctx.font = MONO(11); ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.fillText(num(v, 3), L - 6, y); });
+    ctx.fillStyle = c.muted; ctx.font = FONT(600, 12); ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText("time since the outside changed (log scale)", (L + R) / 2, Bm + 22);
+    if (st.dT === 0) return;
+    // halfway line
+    const half = st.sealed ? (T0 + Tout) / 2 : null;
+    if (st.sealed) { ctx.setLineDash([3, 4]); ctx.strokeStyle = c.muted; ctx.beginPath(); ctx.moveTo(L, ly(half)); ctx.lineTo(R, ly(half)); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = c.muted; ctx.font = FONT(600, 11.5); ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillText("halfway", L + 4, ly(half) - 2); }
+    [[A, c.accent], [B, c.teal]].forEach(([Lx, col]) => {
+      if (!st.sealed) { ctx.setLineDash([6, 4]); ctx.strokeStyle = col; ctx.globalAlpha = .6; ctx.beginPath(); ctx.moveTo(L, ly(Lx.qss)); ctx.lineTo(R, ly(Lx.qss)); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+        ctx.fillStyle = col; ctx.font = FONT(600, 11.5); ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillText("steady " + num(Lx.qss, 2), L + 4, ly(Lx.qss) - 2); }
+      ctx.strokeStyle = col; ctx.lineWidth = 2.6; ctx.beginPath();
+      for (let j = 0; j <= 300; j++) { const lt = TMIN + (TMAX - TMIN) * j / 300, t = Math.pow(10, lt), x = lx(t), y = ly(val(Lx, t)); j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.stroke();
+      // halfway dot
+      if (Lx.tHalf > Math.pow(10, TMIN) && Lx.tHalf < Math.pow(10, TMAX)) {
+        const hv = st.sealed ? half : Lx.qss / 2;
+        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(lx(Lx.tHalf), ly(hv), 5, 0, 7); ctx.fill();
+      }
+      // estimate tick w^2/2a on the axis
+      if (Lx.est > Math.pow(10, TMIN) && Lx.est < Math.pow(10, TMAX)) {
+        const x = lx(Lx.est); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x, Bm - 10); ctx.lineTo(x - 6, Bm - 1); ctx.lineTo(x + 6, Bm - 1); ctx.closePath(); ctx.fill();
+      }
+    });
+    // cursor
+    if (st.t > 0) { const x = lx(clamp(st.t, 0.1, Math.pow(10, TMAX))); ctx.strokeStyle = c.ink; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, Bm); ctx.stroke(); }
+    // legend
+    if (narrow) return;
+    ctx.font = FONT(600, 12); ctx.textBaseline = "middle"; ctx.textAlign = "left";
+    let x = R - 330; const y = 14;
+    ctx.fillStyle = c.muted; ctx.beginPath(); ctx.arc(x, y, 4.5, 0, 7); ctx.fill(); ctx.fillText("halfway", x + 8, y); x += 74;
+    ctx.beginPath(); ctx.moveTo(x, y - 5); ctx.lineTo(x - 5, y + 4); ctx.lineTo(x + 5, y + 4); ctx.closePath(); ctx.fill(); ctx.fillText("estimate w²/2a", x + 9, y); x += 116;
+    ctx.strokeStyle = c.ink; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x, y - 7); ctx.lineTo(x, y + 7); ctx.stroke(); ctx.fillText("now", x + 6, y);
+  }
+  set({});
+  return { draw, set, st, stop };
+})();
+
+/* =================================================================== 3 FLASH */
+tabs.flash = (() => {
+  const LIST = ["alumina", "aln", "glass", "cu", "mystery"];
+  const st = { mat: "alumina", L: 2, fired: false, frac: 0, cursor: null, noise: [] };
+  const host = $("#flashMats");
+  host.innerHTML = LIST.map(k => '<button class="chip" data-m="' + k + '" aria-pressed="false">' + MATS[k].name + '</button>').join("");
+  host.addEventListener("click", e => { const b = e.target.closest("button"); if (b) set({ mat: b.dataset.m, fired: false, frac: 0, cursor: null }); });
+  $("#flashL").addEventListener("input", e => set({ L: +e.target.value, fired: false, frac: 0, cursor: null }));
+  $("#flashFire").addEventListener("click", () => fire());
+  $("#flashIn").addEventListener("input", () => calc(false));
+  $("#flashCheck").addEventListener("click", () => calc(true));
+  let raf = null, geom = null;
+  const cv = $("#flashPlot");
+  cv.addEventListener("pointermove", e => { if (!geom || !st.fired) return; const r = cv.getBoundingClientRect(); hover(e.clientX - r.left, e.clientY - r.top); });
+  cv.addEventListener("pointerleave", () => { $("#flashTip").hidden = true; });
+  cv.addEventListener("click", e => {
+    if (!geom || !st.fired) return; const r = cv.getBoundingClientRect(); const t = geom.tAt(e.clientX - r.left);
+    if (t == null) return; st.cursor = t; $("#flashIn").value = +t.toPrecision(3); calc(false); draw();
+  });
+  const info = () => { const m = MATS[st.mat], L = st.L / 1000, th = FO_HALF_HELD * L * L / m.a; return { m, L, th, tmax: niceMax(5.2 * th) }; };
+  function niceMax(x) { const e = Math.pow(10, Math.floor(Math.log10(x))), f = x / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e; }
+  function fire() {
+    if (raf) cancelAnimationFrame(raf);
+    let seed = 7 + Math.floor(Math.random() * 1000);
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    st.noise = Array.from({ length: 241 }, () => (rnd() + rnd() + rnd() - 1.5) * 0.012);
+    st.fired = true; st.frac = 0; st.cursor = null;
+    const t0 = performance.now(), dur = 3200;
+    const step = now => { st.frac = Math.min(1, (now - t0) / dur); draw(); if (st.frac < 1) raf = requestAnimationFrame(step); else raf = null; };
+    raf = requestAnimationFrame(step);
+  }
+  function hover(px, py) {
+    const t = geom.tAt(px); const tip = $("#flashTip");
+    if (t == null || t > st.frac * geom.tmax) { tip.hidden = true; return; }
+    tip.hidden = false; tip.textContent = "t = " + num(t, 3) + " s · rise " + Math.round(100 * parker(t * geom.a / (geom.L * geom.L))) + " %";
+    tip.style.left = Math.min(px + 12, cv.clientWidth - 190) + "px"; tip.style.top = Math.max(py - 34, 4) + "px";
+  }
+  function calc(check) {
+    const { m, L } = info(), th = parseFloat($("#flashIn").value);
+    if (!(th > 0)) { $("#flashA").textContent = "–"; $("#flashLam").textContent = "–"; $("#flashStatus").textContent = ""; return; }
+    const a = 0.1388 * L * L / th, lam = a * m.rho * m.cp;
+    $("#flashA").textContent = sci(a, 3) + " m²/s"; $("#flashLam").textContent = num(lam, 3) + " W/m·K";
+    if (check) {
+      const err = Math.abs(a / m.a - 1), s = $("#flashStatus");
+      if (err <= 0.1) { s.className = "status ok"; s.textContent = "✓ Within " + Math.max(1, Math.round(err * 100)) + " % of the true value (" + sci(m.a, 2) + " m²/s)." + (m.hidden ? " Mystery X is " + m.real + "." : ""); }
+      else { s.className = "status bad"; s.textContent = "Off by " + Math.round(err * 100) + " %. Read the time where the curve crosses 50 % of its final rise."; }
+    } else $("#flashStatus").textContent = "";
+  }
+  function set(p) {
+    Object.assign(st, p);
+    if (p.mat || p.L) { $("#flashIn").value = ""; calc(false); }
+    $("#flashL").value = st.L; $("#flashLOut").textContent = st.L.toFixed(1) + " mm";
+    $$("button", host).forEach(b => b.setAttribute("aria-pressed", b.dataset.m === st.mat ? "true" : "false"));
+    const m = MATS[st.mat];
+    $("#flashGiven").innerHTML = "Given: ρ = " + m.rho.toLocaleString("en-US") + " kg/m³, C<sub>p</sub> = " + m.cp + " J/kg·K" + (m.hidden ? ". Identity hidden: measure it." : "");
+    draw();
+  }
+  function draw() {
+    const I = info();
+    const tNow = st.fired ? st.frac * I.tmax : 0;
+    $("#flashTHud").textContent = st.fired ? num(tNow, 3) + " s" : "ready";
+    $("#flashCap").textContent = !st.fired ? "Press “Fire the flash”. The detector records the back face of the " + st.L.toFixed(1) + " mm disc."
+      : st.frac < 1 ? "Recording… heat soaks through the disc."
+      : "Done. Find where the curve crosses 50 % of its final rise: that time is t½. Click it to read it.";
+    drawDisc(I, tNow); drawPlot(I, tNow);
+  }
+  function drawDisc(I, tNow) {
+    const { ctx, W, H } = fitCanvas($("#flashCv")); const c = pal();
+    const dw = Math.min(W * 0.62, 560), dh = clamp(14 + st.L * 16, 24, 100), x0 = (W - dw) / 2, y0 = H * 0.5 - dh / 2 + 6;
+    const Fo = tNow * I.m.a / (I.L * I.L);
+    const N = 60;
+    for (let j = 0; j < N; j++) {
+      const th = st.fired ? flashTheta((j + 0.5) / N, Fo) : 0;
+      ctx.fillStyle = tColor(20 + 40 * Math.min(th, 3.5)); ctx.fillRect(x0, y0 + j * dh / N, dw, dh / N + 0.6);
+    }
+    ctx.strokeStyle = c.ink; ctx.lineWidth = 1.2; ctx.strokeRect(x0, y0, dw, dh);
+    ctx.fillStyle = "#1b2430"; ctx.font = FONT(700, 13); ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillStyle = c.ink; ctx.fillText(I.m.name + " disc", x0 + dw + 10, y0 + dh / 2 - 9);
+    ctx.font = MONO(12); ctx.fillStyle = c.muted; ctx.fillText("L = " + st.L.toFixed(1) + " mm", x0 + dw + 10, y0 + dh / 2 + 9);
+    // laser
+    const flashOn = st.fired && st.frac < 0.06;
+    ctx.strokeStyle = flashOn ? "#ff3b3b" : c.rule; ctx.fillStyle = ctx.strokeStyle; ctx.lineWidth = flashOn ? 3 : 2;
+    for (let i = 0; i < 5; i++) { const x = x0 + dw * (0.15 + 0.175 * i); arrow(ctx, x, y0 - 46, x, y0 - 6, 8); }
+    ctx.fillStyle = flashOn ? "#ff3b3b" : c.muted; ctx.font = FONT(700, 13); ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    ctx.fillText("laser flash on the front face", x0 + dw / 2, y0 - 50);
+    // detector
+    const dy = y0 + dh + 14;
+    ctx.fillStyle = c.amber; ctx.strokeStyle = c.amber; ctx.lineWidth = 2;
+    arrow(ctx, x0 + dw / 2, y0 + dh + 2, x0 + dw / 2, dy + 14, 7);
+    ctx.fillStyle = c.soft; ctx.strokeStyle = c.muted; ctx.lineWidth = 1.2; rr(ctx, x0 + dw / 2 - 26, dy + 16, 52, 22, 5); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = c.muted; ctx.font = FONT(600, 12.5); ctx.textBaseline = "top"; ctx.fillText("infrared detector reads the back face", x0 + dw / 2, dy + 42);
+  }
+  function drawPlot(I, tNow) {
+    const { ctx, W, H } = fitCanvas(cv); const c = pal();
+    const L = 58, R = W - 22, T = 26, B = H - capSpace(cv) - 40;
+    const lx = t => L + t / I.tmax * (R - L), ly = v => B - v / 1.2 * (B - T);
+    geom = { tmax: I.tmax, a: I.m.a, L: I.L, tAt: px => (px < L || px > R) ? null : (px - L) / (R - L) * I.tmax };
+    ctx.font = FONT(700, 12); ctx.fillStyle = c.muted; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+    ctx.fillText("BACK-FACE TEMPERATURE RISE (% OF FINAL)", L, 16);
+    ctx.lineWidth = 1;
+    for (let k = 0; k <= 5; k++) { const t = I.tmax * k / 5, x = lx(t); ctx.strokeStyle = c.rule; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, B); ctx.stroke(); ctx.fillStyle = c.muted; ctx.font = MONO(11); ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText(num(t, 3), x, B + 6); }
+    [0, 25, 50, 75, 100].forEach(v => { const y = ly(v / 100); ctx.strokeStyle = v === 50 || v === 100 ? c.muted : c.rule; ctx.setLineDash(v === 50 || v === 100 ? [4, 4] : []); ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = c.muted; ctx.font = MONO(11); ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.fillText(v + "%", L - 6, y); });
+    ctx.fillStyle = c.muted; ctx.font = FONT(600, 12); ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText("time after the flash (s)", (L + R) / 2, B + 22);
+    if (!st.fired) return;
+    ctx.strokeStyle = c.accent; ctx.lineWidth = 2.4; ctx.beginPath();
+    const n = st.noise.length - 1;
+    for (let j = 0; j <= n; j++) { const t = I.tmax * j / n; if (t > tNow) break; const v = parker(t * I.m.a / (I.L * I.L)) + (j ? st.noise[j] : 0); const x = lx(t), y = ly(v); j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke();
+    if (st.cursor != null) {
+      const x = lx(st.cursor); ctx.strokeStyle = c.teal; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, B); ctx.stroke();
+      ctx.fillStyle = c.teal; ctx.font = MONO(12); ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText("your t½ = " + num(st.cursor, 3) + " s", Math.min(x + 6, R - 160), T + 4);
+    }
+  }
+  set({});
+  return { draw, set, fire, st, info };
+})();
+
+/* =================================================================== 4 CHART */
+tabs.chart = (() => {
+  const LIST = ["cu", "al", "aln", "alumina", "steel", "ss", "ti", "stone", "concrete", "glass", "adobe", "brick", "aerated", "firebrick", "neoprene", "cork", "psfoam"];
+  const CLS = { metal: ["#a51c30", "Metals"], ceramic: ["#1d7486", "Technical ceramics"], glass: ["#b97d0c", "Glass"], build: ["#7a6a55", "Stone, concrete, brick"], polymer: ["#2f7d4a", "Polymers, elastomers"], foam: ["#7b4fa0", "Foams, cork"] };
+  // label placement: [dx, dy, align]
+  const LAB = { cu: [8, -8, "left"], al: [8, 10, "left"], aln: [-8, -8, "right"], alumina: [8, 0, "left"], steel: [8, 0, "left"], ss: [8, 2, "left"], ti: [-8, -2, "right"],
+    stone: [8, -6, "left"], concrete: [8, 6, "left"], glass: [-8, -8, "right"], adobe: [-8, 2, "right"], brick: [-8, 12, "right"], aerated: [8, -4, "left"], firebrick: [8, 10, "left"],
+    neoprene: [8, 0, "left"], cork: [8, 4, "left"], psfoam: [8, 0, "left"] };
+  const GOALS = {
+    months: { idx: "M = 1/λ (minimize λ)", con: "none: steady state for months", f: m => 1 / m.lam, ok: () => true, v: m => num(m.lam, 2) + " W/m·K",
+      cap: "Steady for months: heat leaks at q = λΔT/w, so the lowest λ wins: foams and cork. Better = below the line." },
+    hour: { idx: "M = 1/a (minimize a)", con: "w ≤ 20 mm, hold 1 h ⇒ a ≤ w²/2t = 5.6 × 10⁻⁸ m²/s", f: m => 1 / m.a, ok: m => m.a <= 0.02 * 0.02 / 7200, v: m => sci(m.a, 2) + " m²/s",
+      cap: "One hour through 20 mm: the change must not cross the wall, t ≈ w²/2a. Lowest a wins: solid elastomers such as neoprene, not foam. Better = left of the line." },
+    store: { idx: "M = λ/a½ (maximize)", con: "w ≤ 0.5 m for a 12 h delay ⇒ a ≤ 3 × 10⁻⁶ m²/s", f: m => m.lam / Math.sqrt(m.a), ok: m => m.a <= 3e-6, v: m => num(m.lam / Math.sqrt(m.a) / 1000, 2) + "×10³" + (m.cost ? " · $" + (m.costTxt || m.cost.toLocaleString("en-US")) + "/m³" : ""),
+      cap: "Sun wall: store the most heat in a wall the heat crosses in 12 h. Maximize λ/a½ = √(λρCp). Better = above the line; the cost column decides." },
+    kiln: { idx: "M = a½/λ (maximize)", con: "works at 1000 °C (approx. max service temperature)", f: m => Math.sqrt(m.a) / m.lam, ok: m => m.tmax >= 1000, v: m => sci(Math.sqrt(m.a) / m.lam, 2) + " · w = " + Math.round(1000 * Math.sqrt(2 * m.a * 10800)) + " mm",
+      cap: "Kiln wall: waste the least heat per 3 h firing, through the wall and into it. Maximize a½/λ: the sun wall's index turned upside down. Better = below the line." }
+  };
+  const st = { goal: "months", line: 0.5, sel: null };
+  const XR = [-8.3, -3.4], YR = [-2, 3]; // log10 a, log10 lambda
+  let pts = [], geo = null;
+  const setGoal = seg($("#chartGoal"), v => set({ goal: v, line: null }));
+  $("#chartLine").addEventListener("input", e => set({ line: +e.target.value }));
+  $("#chartSrc").textContent = "Property values: " + LIST.map(k => MATS[k].name + " " + MATS[k].src).join("; ") + ".";
+  const cv = $("#chartCv");
+  cv.addEventListener("pointermove", e => { const r = cv.getBoundingClientRect(); hover(e.clientX - r.left, e.clientY - r.top); });
+  cv.addEventListener("pointerleave", () => { $("#chartTip").hidden = true; });
+  cv.addEventListener("click", e => { const r = cv.getBoundingClientRect(); const p = near(e.clientX - r.left, e.clientY - r.top); set({ sel: p ? p.k : null }); });
+  $("#chartRank").addEventListener("click", e => { const li = e.target.closest("li"); if (li) set({ sel: li.dataset.k }); });
+  function near(x, y) { let best = null, bd = 14 * 14; pts.forEach(p => { const d = (p.x - x) ** 2 + (p.y - y) ** 2; if (d < bd) { bd = d; best = p; } }); return best; }
+  function hover(x, y) {
+    const p = near(x, y), tip = $("#chartTip");
+    if (!p) { tip.hidden = true; return; }
+    const m = MATS[p.k];
+    tip.hidden = false; tip.innerHTML = "<b>" + m.name + "</b><br>λ = " + num(m.lam, 3) + " W/m·K · a = " + sci(m.a, 2) + " m²/s<br>ρC<sub>p</sub> = " + num(m.rhocp / 1e6, 2) + " MJ/m³·K";
+    tip.style.left = Math.min(x + 14, cv.clientWidth - 260) + "px"; tip.style.top = Math.max(y - 60, 4) + "px";
+  }
+  // the line lives in log index space between the extreme values on the chart
+  function idxRange(g) { const v = LIST.map(k => Math.log10(GOALS[g].f(MATS[k]))); return [Math.min(...v) - 0.3, Math.max(...v) + 0.3]; }
+  function defaultLine(g) {
+    const G = GOALS[g], ok = LIST.filter(k => G.ok(MATS[k])).map(k => Math.log10(G.f(MATS[k]))).sort((a, b) => b - a);
+    const [lo, hi] = idxRange(g), v = ok.length > 3 ? (ok[2] + ok[3]) / 2 : ok[ok.length - 1] - 0.1;
+    return (v - lo) / (hi - lo);
+  }
+  function set(p) {
+    Object.assign(st, p);
+    if (st.line == null) st.line = defaultLine(st.goal);
+    setGoal(st.goal); $("#chartLine").value = st.line;
+    const G = GOALS[st.goal];
+    $("#chartIdx").textContent = G.idx; $("#chartCon").textContent = G.con;
+    const [lo, hi] = idxRange(st.goal), M = Math.pow(10, lo + st.line * (hi - lo));
+    $("#chartLineOut").textContent = "M = " + sci(M, 2);
+    const ranked = LIST.map(k => ({ k, m: MATS[k], M: G.f(MATS[k]), ok: G.ok(MATS[k]) })).sort((a, b) => (b.ok - a.ok) || (b.M - a.M));
+    $("#chartRank").innerHTML = ranked.slice(0, 8).map((r, i) => '<li data-k="' + r.k + '" class="' + (r.ok ? "" : "out ") + (r.k === st.sel ? "sel" : "") + '"><b>' + (r.ok ? i + 1 : "×") + '</b><span>' + r.m.name + (r.ok ? "" : "<small>fails the constraint</small>") + (r.ok && r.M < M ? "<small>below the line</small>" : "") + '</span><span class="v">' + G.v(r.m) + '</span></li>').join("");
+    $("#chartCap").textContent = G.cap;
+    draw();
+  }
+  function draw() {
+    const { ctx, W, H } = fitCanvas(cv); const c = pal();
+    const narrowC = W < 620, L = narrowC ? 52 : 70, R = W - 16, T = 22, B = H - capSpace(cv) - (narrowC ? 84 : 62);
+    const X = la => L + (la - XR[0]) / (XR[1] - XR[0]) * (R - L), Y = ll => B - (ll - YR[0]) / (YR[1] - YR[0]) * (B - T);
+    ctx.save(); ctx.beginPath(); ctx.rect(L, T, R - L, B - T); ctx.clip();
+    // decades
+    ctx.lineWidth = 1; ctx.strokeStyle = c.rule;
+    for (let e = Math.ceil(XR[0]); e <= XR[1]; e++) { ctx.beginPath(); ctx.moveTo(X(e), T); ctx.lineTo(X(e), B); ctx.stroke(); }
+    for (let e = YR[0]; e <= YR[1]; e++) { ctx.beginPath(); ctx.moveTo(L, Y(e)); ctx.lineTo(R, Y(e)); ctx.stroke(); }
+    // rho cp guidelines: lam = rhocp * a
+    [[1e5, "0.1"], [1e6, "1"], [3e6, "3"]].forEach(([rc, lab]) => {
+      ctx.setLineDash([2, 5]); ctx.strokeStyle = c.muted; ctx.lineWidth = 1; ctx.beginPath();
+      ctx.moveTo(X(XR[0]), Y(XR[0] + Math.log10(rc))); ctx.lineTo(X(XR[1]), Y(XR[1] + Math.log10(rc))); ctx.stroke(); ctx.setLineDash([]);
+      // label along the line, near the bottom of the chart
+      const ll = -1.75, la = ll - Math.log10(rc);
+      if (la > XR[0] + 0.05) {
+        const ang = Math.atan2(Y(ll + 1) - Y(ll), X(la + 1) - X(la));
+        ctx.save(); ctx.translate(X(la), Y(ll)); ctx.rotate(ang);
+        ctx.fillStyle = c.muted; ctx.font = FONT(600, 11.5); ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+        ctx.fillText("ρCp = " + lab + " MJ/m³K", 4, -2); ctx.restore();
+      }
+    });
+    // constraint shading
+    const G = GOALS[st.goal];
+    const shade = () => { ctx.fillStyle = "rgba(120,130,145,.13)"; };
+    if (st.goal === "hour") { shade(); const x = X(Math.log10(0.02 * 0.02 / 7200)); ctx.fillRect(x, T, R - x, B - T); }
+    if (st.goal === "store") { shade(); const x = X(Math.log10(3e-6)); ctx.fillRect(x, T, R - x, B - T); }
+    // selection line
+    const [lo, hi] = idxRange(st.goal), lM = lo + st.line * (hi - lo);
+    ctx.strokeStyle = c.accent; ctx.lineWidth = 2.6; ctx.fillStyle = "rgba(165,28,48,.08)";
+    ctx.beginPath();
+    if (st.goal === "months") { const y = Y(-lM); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke(); ctx.fillRect(L, y, R - L, B - y); }
+    else if (st.goal === "hour") { const x = X(-lM); ctx.moveTo(x, T); ctx.lineTo(x, B); ctx.stroke(); ctx.fillRect(L, T, x - L, B - T); }
+    else {
+      const f = st.goal === "store" ? la => lM + la / 2 : la => la / 2 - lM;
+      ctx.moveTo(X(XR[0]), Y(f(XR[0]))); ctx.lineTo(X(XR[1]), Y(f(XR[1]))); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(X(XR[0]), Y(f(XR[0]))); ctx.lineTo(X(XR[1]), Y(f(XR[1])));
+      if (st.goal === "store") { ctx.lineTo(R, T - 400); ctx.lineTo(L, T - 400); } else { ctx.lineTo(R, B + 400); ctx.lineTo(L, B + 400); }
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+    // points
+    pts = [];
+    LIST.forEach(k => {
+      const m = MATS[k], x = X(Math.log10(m.a)), y = Y(Math.log10(m.lam)), ok = G.ok(m), good = ok && G.f(m) >= Math.pow(10, lM);
+      pts.push({ k, x, y });
+      ctx.globalAlpha = ok ? 1 : 0.28;
+      ctx.fillStyle = CLS[m.cls][0]; ctx.beginPath(); ctx.arc(x, y, good ? 7.5 : 5.5, 0, 7); ctx.fill();
+      if (good) { ctx.strokeStyle = c.ink; ctx.lineWidth = 1.6; ctx.stroke(); }
+      if (k === st.sel) { ctx.strokeStyle = c.accent; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y, 12, 0, 7); ctx.stroke(); }
+      let [dx, dy, al] = LAB[k];
+      if (W < 620 && x > R - 70 && al === "left") { dx = -dx; al = "right"; }
+      ctx.fillStyle = c.ink; ctx.font = FONT(good ? 700 : 600, 13); ctx.textAlign = al; ctx.textBaseline = "middle";
+      ctx.fillText(m.name, x + dx, y + dy);
+      ctx.globalAlpha = 1;
+    });
+    // axes
+    ctx.strokeStyle = c.ink; ctx.lineWidth = 1.2; ctx.strokeRect(L, T, R - L, B - T);
+    ctx.fillStyle = c.muted; ctx.font = MONO(11);
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (let e = Math.ceil(XR[0]); e <= XR[1]; e++) ctx.fillText("10" + String(e).split("").map(ch => SUP[ch]).join(""), X(e), B + 6);
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    for (let e = YR[0]; e <= YR[1]; e++) ctx.fillText(e < 0 ? (Math.pow(10, e)).toString() : Math.pow(10, e).toLocaleString("en-US"), L - 6, Y(e));
+    ctx.font = FONT(600, 12.5); ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.fillText("Thermal diffusivity a (m²/s)", (L + R) / 2, B + 22);
+    ctx.save(); ctx.translate(18, (T + B) / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = "middle"; ctx.fillText("Thermal conductivity λ (W/m·K)", 0, 0); ctx.restore();
+    // legend
+    ctx.font = FONT(600, 12); ctx.textBaseline = "middle"; ctx.textAlign = "left";
+    let lx = L, ly = B + 44;
+    Object.values(CLS).forEach(([col, lab]) => { const w = ctx.measureText(lab).width + 26; if (lx + w > R) { lx = L; ly += 18; } ctx.fillStyle = col; ctx.beginPath(); ctx.arc(lx + 5, ly, 5, 0, 7); ctx.fill(); ctx.fillStyle = c.muted; ctx.fillText(lab, lx + 14, ly); lx += w; });
+  }
+  set({ line: null });
+  return { draw, set, st };
+})();
+
+/* =================================================================== explore questions */
+mountGuide("chip", [
+  { q: "Copper conducts heat best of all these plates. Why can't the chip sit straight on a copper plate?",
+    a: "Copper also conducts electricity: the chip's contacts would short through the plate. The screen (must be an electrical insulator) removes every metal before we rank on λ. Among insulators, aluminum nitride conducts best.",
+    setup: () => tabs.chip.set({ mat: "cu", X: 2, P: 10 }) },
+  { q: "Alumina is the cheaper ceramic. How hot does the chip get on 2 mm of alumina, compared with aluminum nitride?",
+    a: "About 640 °C on alumina against about 150 °C on AlN. Fourier: ΔT = qX/λ = 10⁷ × 0.002/λ, and AlN's λ (170) is five times alumina's (33). Same screen, but ranking on λ picks AlN.",
+    setup: () => tabs.chip.set({ mat: "alumina", X: 2, P: 10 }) },
+  { q: "Keep AlN. What happens to the chip temperature if you halve the plate to 1 mm? Why?",
+    a: "The rise halves, from about 118 °C to about 59 °C, so the chip runs near 90 °C. ΔT = qX/λ is proportional to the thickness: thin plates of a high-λ insulator are best.",
+    setup: () => tabs.chip.set({ mat: "aln", X: 1, P: 10 }) }
+]);
+mountGuide("wall", [
+  { q: "A radio beacon must stay steady for an hour after a 30 °C cold snap, behind a wall no thicker than 20 mm. Foam has the lowest λ. Which wall keeps the inside steady longer: foam or neoprene?",
+    a: "Neoprene. Foam conducts little but stores almost no heat, so its inside is halfway to the cold within about 3 minutes. Solid neoprene stores heat in every cubic millimetre: its a is about 19× lower, and its inside is only halfway after about 50 minutes (estimate w²/2a ≈ 1.1 h). Short-term insulation: minimize a.",
+    setup: () => { tabs.wall.stop(); tabs.wall.set({ a: "psfoam", b: "neoprene", w: 20, dT: -30, sealed: true, t: 3600 }); } },
+  { q: "Same two walls, but now a cold room: a cooler holds the inside steady for months. Which wall lets less heat through once things have settled?",
+    a: "Foam: about 53 W/m² against 180 W/m² for neoprene, 3.4× less, because λ is 0.035 against 0.12 W/m·K. Steady state for months: minimize λ. The same two materials, the opposite answer: the time scale decides the index.",
+    setup: () => { tabs.wall.stop(); tabs.wall.set({ a: "psfoam", b: "neoprene", w: 20, dT: -30, sealed: false, t: 86400 }); } },
+  { q: "Boiling water is poured into a glass with a 3 mm wall. The estimate w²/2a says about 8 s. When is the outside of the glass halfway to boiling? What about a copper cup?",
+    a: "Glass: about 6 s, the same size as the 8 s estimate. Copper: about 0.03 s, because its a is about 200× higher. Heat soaks through a wall in a time that grows as w²/a.",
+    setup: () => { tabs.wall.stop(); tabs.wall.set({ a: "glass", b: "cu", w: 3, dT: 80, sealed: true, t: 8 }); } },
+  { q: "Double the neoprene wall from 20 mm to 40 mm. How much longer does the beacon hold out?",
+    a: "Four times longer: about 3.5 h halfway instead of about 52 min. The front moves as √(2at), so the time to cross grows with the thickness squared.",
+    setup: () => { tabs.wall.stop(); tabs.wall.set({ a: "neoprene", b: "neoprene", w: 40, dT: -30, sealed: true, t: 3 * 3600 }); } }
+]);
+mountGuide("flash", [
+  { q: "Fire the flash at a 2 mm alumina disc. Click the curve where it reaches half its final rise, then read off a and λ.",
+    a: "t½ ≈ 0.052 s. Then a = 0.139 × (0.002)² / 0.052 ≈ 1.07 × 10⁻⁵ m²/s, and λ = aρCp ≈ 1.07 × 10⁻⁵ × 3980 × 775 ≈ 33 W/m·K.",
+    setup: () => { tabs.flash.set({ mat: "alumina", L: 2, fired: false, cursor: null }); tabs.flash.fire(); } },
+  { q: "Predict before you fire: a 4 mm alumina disc. How long will t½ be?",
+    a: "Four times longer, about 0.21 s. Doubling L quadruples the time: the same square-root law as the hot front, used here as a measurement.",
+    setup: () => { tabs.flash.set({ mat: "alumina", L: 4, fired: false, cursor: null }); tabs.flash.fire(); } },
+  { q: "Mystery X: a 2 mm disc, ρ = 8000 kg/m³, Cp = 502 J/kg·K. Measure λ. Which material is it?",
+    a: "t½ ≈ 0.14 s, so a ≈ 4.0 × 10⁻⁶ m²/s and λ ≈ 16 W/m·K. Dense like steel but conducts five times less than iron: 316 stainless steel, whose alloying atoms scatter the electrons that carry heat.",
+    setup: () => { tabs.flash.set({ mat: "mystery", L: 2, fired: false, cursor: null }); tabs.flash.fire(); } },
+  { q: "Fire at a 2 mm glass disc. Why does glass take about a second when alumina took 0.05 s?",
+    a: "Glass has about 19× lower diffusivity (5.6 × 10⁻⁷ against 1.07 × 10⁻⁵ m²/s): its disordered network scatters lattice vibrations, so λ is only about 1 W/m·K while it still stores about as much heat per m³.",
+    setup: () => { tabs.flash.set({ mat: "glass", L: 2, fired: false, cursor: null }); tabs.flash.fire(); } }
+]);
+mountGuide("chart", [
+  { q: "Insulate for months, then for an hour. Which corner of the chart wins each time, and why do they differ?",
+    a: "Months: the bottom (lowest λ): foams and cork, because at steady state the leak is λΔT/w. One hour through 20 mm: the left (lowest a): solid elastomers like neoprene, because the change must not cross the wall in that time. Foams sit low but not far left: they store very little heat.",
+    setup: () => tabs.chart.set({ goal: "hour", line: null, sel: "neoprene" }) },
+  { q: "Sun wall: titanium tops the index λ/a½. Why does the design still use concrete?",
+    a: "Cost. Titanium is about $200,000 per m³, concrete about $200. Concrete gives roughly half titanium's index at a thousandth of the price. The metals with higher λ/a½ (steel, copper) fail the limit a ≤ 3 × 10⁻⁶: the heat would cross a 0.5 m wall too soon.",
+    setup: () => tabs.chart.set({ goal: "store", line: null, sel: "concrete" }) },
+  { q: "Kiln wall: foams and cork have the best a½/λ. Why do they drop out, and what wins?",
+    a: "They burn or melt far below 1000 °C. Among materials that survive, porous refractories win: refractory brick, then aerated concrete. Pores cut λ and also cut the heat the wall soaks up each firing; the wall should be about √(2at) ≈ 100 mm thick.",
+    setup: () => tabs.chart.set({ goal: "kiln", line: null, sel: "firebrick" }) },
+  { q: "Compare the sun-wall line with the kiln line. Both have slope ½. What changed?",
+    a: "The direction. λ/a½ = √(λρCp): the sun wall should soak up as much heat as possible, so better is above the line. The kiln wall should soak up as little as possible, so its index is the inverse and better is below the line.",
+    setup: () => tabs.chart.set({ goal: "store", line: null, sel: null }) }
+]);
+
+/* =================================================================== deep links: #tab or #tab:n */
+function fromHash() {
+  const h = location.hash.replace("#", ""), [name, n] = h.split(":");
+  if (tabs[name]) { activate(name); if (n && guides[name]) guides[name].go(+n - 1, true); }
+  else activate("chip");
+}
+window.addEventListener("hashchange", fromHash);
+fromHash();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => tabs[active].draw());
+</script>
