@@ -6,7 +6,7 @@ Four realistic, hands-on 3D scenes for **ES 192: Materials Selection in Mechanic
 
 | | Scene | Link | The idea |
 |---|---|---|---|
-| 🔌 | Cool the chip | [#chip](https://curiositaslabs.github.io/es192-heat-lab/#chip) | A power-module stack: silicon die, aluminum bond wires and copper pads on the substrate you choose, on a water-cooled plate. ΔT = q·X/λ. Metals short the chip (sparks); weak conductors overheat it (smoke); aluminum nitride works. |
+| 🔌 | Cool the chip | [#chip](https://curiositaslabs.github.io/es192-heat-lab/#chip) | A power-module stack at true scale: a 1 mm silicon die, aluminum bond wires and copper pads on the substrate you choose, on a water-cooled plate. ΔT = q·X/λ. Metals short the chip (sparks); weak conductors overheat it (smoke); aluminum nitride works. |
 | ✋ | Touch test | [#touch](https://curiositaslabs.github.io/es192-heat-lab/#touch) | A fingertip on a block of copper, aluminum, steel, granite, glass, polypropylene, pine or foam at any temperature. You feel the contact temperature, set by √(λρCp). Why sauna benches are wood. |
 | ☕ | Hot-cup race | [#cup](https://curiositaslabs.github.io/es192-heat-lab/#cup) | Boiling tea poured into copper, stainless-steel, glass and polypropylene tumblers at once. t ≈ x²/2a: twice the wall, four times as long. |
 | 🏆 | Pick the wall | [#wall](https://curiositaslabs.github.io/es192-heat-lab/#wall) | An Ashby chart of λ against a, with property-range bubbles and family envelopes, four design goals, a draggable selection line and medals. |

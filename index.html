@@ -142,7 +142,7 @@ body.present .lesson .q { font-size: 22px; }
   .scene { height: auto; min-height: 0; grid-template-rows: auto auto auto; }
   .stage { height: min(70vh, 560px); min-height: 400px; }
   .lesson { position: static; width: auto; backdrop-filter: none; }
-  .big { left: 50%; top: 12px; } .big .n { font-size: 48px; } .big .s { font-size: 15px; } .badge { font-size: 16px; }
+  .big { left: 50%; top: 12px; width: 92%; white-space: normal; } .big .n { font-size: 48px; } .big .s { font-size: 14px; } .badge { font-size: 15px; }
   .tile { min-width: 0; padding: 7px 10px 7px 8px; font-size: 15px; }
   .irui { width: 46px; right: 8px; }
   .tag { font-size: 12.5px; padding: 4px 7px; } .tag b { font-size: 13.5px; }
@@ -155,10 +155,10 @@ body.present .lesson .q { font-size: 22px; }
   <div class="in">
     <a class="brand" href="#chip">ES 192 <span>Heat Lab</span></a>
     <nav class="tabs" role="tablist" aria-label="Scenes">
-      <button role="tab" data-tab="chip" aria-selected="true"><span class="e">🔌</span>Cool the chip</button>
-      <button role="tab" data-tab="touch" aria-selected="false"><span class="e">✋</span>Touch test</button>
-      <button role="tab" data-tab="cup" aria-selected="false"><span class="e">☕</span>Hot-cup race</button>
-      <button role="tab" data-tab="wall" aria-selected="false"><span class="e">🏆</span>Pick the wall</button>
+      <button role="tab" data-tab="chip" aria-selected="true">Cool the chip</button>
+      <button role="tab" data-tab="touch" aria-selected="false">Touch test</button>
+      <button role="tab" data-tab="cup" aria-selected="false">Hot-cup race</button>
+      <button role="tab" data-tab="wall" aria-selected="false">Pick the wall</button>
     </nav>
     <div class="tools">
       <button class="ibtn" id="ideasBtn" title="The four key ideas on one page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg><span class="lbl">Key ideas</span></button>
@@ -400,7 +400,7 @@ class Puffs {
 
 /* ======================================================= 3D scene scaffold */
 function makeScene(name, cam, target, opts = {}) {
-  const S = { name, scene: new THREE.Scene(), camera: new THREE.PerspectiveCamera(opts.fov || 32, 1, 0.1, 400), ir: false, range: { min: { value: 15 }, max: { value: 120 } } };
+  const S = { name, scene: new THREE.Scene(), camera: new THREE.PerspectiveCamera(opts.fov || 32, 1, opts.near || 0.1, 400), ir: false, range: { min: { value: 15 }, max: { value: 120 } } };
   S.stage = $("#s-" + name + " .stage"); S.ov = $("#s-" + name + " .ov");
   S.camera.position.copy(cam); S.target = target.clone(); S.camBase = cam.clone();
   if (renderer) {
@@ -409,9 +409,10 @@ function makeScene(name, cam, target, opts = {}) {
     S.controls.minPolarAngle = 0.35; S.controls.maxPolarAngle = 1.32; S.controls.minAzimuthAngle = -0.9; S.controls.maxAzimuthAngle = 0.9;
     S.controls.minDistance = cam.distanceTo(target) * 0.45; S.controls.maxDistance = cam.distanceTo(target) * 1.8; S.controls.enabled = false;
   }
-  const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(10, 22, 12); key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048); const sc = key.shadow.camera; sc.left = -24; sc.right = 24; sc.top = 24; sc.bottom = -24; sc.near = 1; sc.far = 80;
-  key.shadow.bias = -0.0003; key.shadow.normalBias = 0.02; key.shadow.radius = 5; S.scene.add(key);
+  const sh = opts.shadow || 24, ls = sh / 24;
+  const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(10 * ls, 22 * ls, 12 * ls); key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048); const sc = key.shadow.camera; sc.left = -sh; sc.right = sh; sc.top = sh; sc.bottom = -sh; sc.near = ls; sc.far = 80 * ls;
+  key.shadow.bias = -0.0003; key.shadow.normalBias = 0.02 * ls; key.shadow.radius = 5; S.scene.add(key);
   const table = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), MAT3.table); table.rotation.x = -Math.PI / 2; table.receiveShadow = true; S.scene.add(table);
   S.add = (mesh, therm) => { mesh.castShadow = mesh.receiveShadow = true; S.scene.add(mesh); if (therm) mesh.userData.th = therm; return mesh; };
   table.userData.th = () => ({ T: 22 });
@@ -507,47 +508,42 @@ function orientFinger(f, contact, dir, ref) {
 
 /* ======================================================= 1 COOL THE CHIP: a power-module stack */
 function buildChip() {
-  const S = makeScene("chip", V3(9.5, 9, 13), V3(0, 1.7, 0), { fov: 30 }); S.fitAspect = 1.25;
+  // true scale, in cm: a 1 mm x 1 mm silicon die (the lecture's 10 W on 1 mm^2), 0.3 mm copper pads,
+  // 0.3 mm aluminum bond wires, the substrate at its real thickness, on a small water-cooled plate
+  const S = makeScene("chip", V3(2.7, 3.1, 3.9), V3(0, 0.72, 0), { fov: 30, shadow: 4, near: 0.02 }); S.fitAspect = 1.25;
   const st = { mat: "aln", X: 2 }; S.st = st;
-  const die = V3(-1.05, 0, 0);
-  const plate = S.add(new THREE.Mesh(new RoundedBoxGeometry(9, 1.4, 6.6, 4, 0.14), MAT3.al), () => ({ T: 30, Tc: 30 + 0.05 * (chipT(MATS[st.mat], st.X) - 30), C: die, R: 3.5 })); plate.position.y = 0.7; plate.userData.mesh = plate;
-  for (const [x, z] of [[-4, -2.8], [4, -2.8], [-4, 2.8], [4, 2.8]]) { const sc = S.add(new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.22, 24), MAT3.screw), () => ({ T: 30 })); sc.position.set(x, 1.5, z); sc.userData.mesh = sc; const hx = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.05, 6), new THREE.MeshStandardMaterial({ color: 0x050505, roughness: .8 })); hx.position.set(x, 1.6, z); S.scene.add(hx); }
-  for (const x of [-2.4, 2.4]) {
-    const barb = S.add(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.34, 1.3, 28), MAT3.brass), () => ({ T: 29 })); barb.rotation.x = Math.PI / 2; barb.position.set(x, 0.75, -3.9); barb.userData.mesh = barb;
-    const curve = new THREE.CatmullRomCurve3([V3(x, 0.75, -4.3), V3(x, 0.75, -6.2), V3(x * 1.5, 0.48, -9.5), V3(x * 2.4, 0.48, -16)]);
-    const tube = S.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 0.46, 28), MAT3.tube), () => ({ T: 27 })); tube.userData.mesh = tube;
+  const DX = -0.4, Tc = () => chipT(MATS[st.mat], st.X), spread = () => 0.05 + 0.05 * st.X;
+  S.dieWorld = V3(DX, 1, 0);
+  const plate = S.add(new THREE.Mesh(new RoundedBoxGeometry(4.4, 0.6, 3.2, 4, 0.05), MAT3.al), () => ({ T: 30, Tc: 30 + 0.04 * (Tc() - 30), C: S.dieWorld, R: 1.2 })); plate.position.y = 0.3;
+  for (const [x, z] of [[-1.95, -1.35], [1.95, -1.35], [-1.95, 1.35], [1.95, 1.35]]) {
+    const sc = S.add(new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.08, 24), MAT3.screw), () => ({ T: 30 })); sc.position.set(x, 0.64, z);
+    const hx = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.02, 6), new THREE.MeshStandardMaterial({ color: 0x050505, roughness: .8 })); hx.position.set(x, 0.68, z); S.scene.add(hx);
   }
-  const sub = S.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), MAT3.aln), () => ({ T: 30 + 0.04 * (chipT(MATS[st.mat], st.X) - 30), Tc: chipT(MATS[st.mat], st.X), C: S.dieWorld, R: 0.8 + 0.25 * st.X })); sub.userData.mesh = sub;
-  const padMat = MAT3.cu, pads = [];
-  for (const [x, w] of [[-1.05, 2.3], [1.35, 1.6]]) { const p = S.add(new THREE.Mesh(new RoundedBoxGeometry(w, 0.035, 2.9, 2, 0.012), padMat), () => ({ T: 30, Tc: chipT(MATS[st.mat], st.X), C: S.dieWorld, R: 0.8 + 0.25 * st.X })); p.position.x = x; p.userData.mesh = p; pads.push(p); }
-  const solder = S.add(new THREE.Mesh(new THREE.BoxGeometry(1.08, 0.02, 1.08), MAT3.solder), () => ({ T: chipT(MATS[st.mat], st.X) })); solder.position.x = die.x; solder.userData.mesh = solder;
-  const dieM = S.add(new THREE.Mesh(new THREE.BoxGeometry(1, 0.05, 1), MAT3.die), () => ({ T: chipT(MATS[st.mat], st.X) })); dieM.position.x = die.x; dieM.userData.mesh = dieM;
+  for (const x of [-1.0, 1.0]) {
+    const barb = S.add(new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.5, 28), MAT3.brass), () => ({ T: 29 })); barb.rotation.x = Math.PI / 2; barb.position.set(x, 0.3, -1.85);
+    const curve = new THREE.CatmullRomCurve3([V3(x, 0.3, -2.0), V3(x, 0.3, -2.9), V3(x * 1.5, 0.2, -4.3), V3(x * 2.4, 0.2, -7.5)]);
+    S.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 0.2, 28), MAT3.tube), () => ({ T: 27 }));
+  }
+  const radial = () => ({ T: 30 + 0.02 * (Tc() - 30), Tc: Tc(), C: S.dieWorld, R: spread() });
+  const sub = S.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), MAT3.aln), radial);
+  const pads = [[-0.4, 0.95], [0.45, 0.55]].map(([x, w]) => { const p = S.add(new THREE.Mesh(new RoundedBoxGeometry(w, 0.03, 1.15, 2, 0.008), MAT3.cu), radial); p.position.x = x; return p; });
+  const solder = S.add(new THREE.Mesh(new THREE.BoxGeometry(0.112, 0.006, 0.112), MAT3.solder), () => ({ T: Tc() })); solder.position.x = DX;
+  const dieM = S.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.03, 0.1), MAT3.die), () => ({ T: Tc() })); dieM.position.x = DX;
   const wires = new THREE.Group(); S.scene.add(wires);
-  const terms = [];
-  for (const [x, flip] of [[-2.05, -1], [2.05, 1]]) {
-    const g = new THREE.Group();
-    const up = new THREE.Mesh(new THREE.BoxGeometry(0.07, 2.1, 0.9), MAT3.tinned), tab = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.07, 0.9), MAT3.tinned), foot = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.06, 0.9), MAT3.tinned);
-    up.position.set(0, 1.05, 0); tab.position.set(flip * 0.47, 2.1, 0); foot.position.set(-flip * 0.2, 0.03, 0);
-    for (const m of [up, tab, foot]) { m.castShadow = m.receiveShadow = true; g.add(m); }
-    const hole = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.08, 20), new THREE.MeshStandardMaterial({ color: 0x0b0b0b })); hole.position.set(flip * 0.55, 2.1, 0); g.add(hole);
-    g.position.x = x; S.scene.add(g); terms.push(g);
-  }
   const smoke = new Puffs(S.scene, 46, TX.smoke, false), sparks = new Puffs(S.scene, 80, TX.spark, true);
-  const flash = new THREE.PointLight(0x9fc7ff, 0, 6, 2); S.scene.add(flash);
-  S.dieWorld = V3(die.x, 2, 0);
+  const flash = new THREE.PointLight(0x9fc7ff, 0, 2, 2); S.scene.add(flash);
   function layout() {
-    const m = MATS[st.mat], t = 0.1 + st.X * 0.08;
-    sub.geometry.dispose(); sub.geometry = new RoundedBoxGeometry(5, t, 3.7, 3, Math.min(0.04, t / 3)); sub.position.y = 1.4 + t / 2;
+    const t = st.X / 10;   // substrate thickness at true scale
+    sub.geometry.dispose(); sub.geometry = new RoundedBoxGeometry(1.8, t, 1.4, 3, Math.min(0.012, t / 3)); sub.position.y = 0.6 + t / 2;
     sub.userData.orig = MAT3[st.mat]; if (!S.ir) sub.material = MAT3[st.mat];
-    const top = 1.4 + t; pads.forEach(p => { p.position.y = top + 0.0175; }); solder.position.y = top + 0.045; dieM.position.y = top + 0.08; S.dieWorld.set(die.x, top + 0.1, 0);
-    terms[0].position.y = top + 0.035; terms[1].position.y = top + 0.035;
+    const top = 0.6 + t; pads.forEach(p => { p.position.y = top + 0.015; });
+    solder.position.y = top + 0.033; dieM.position.y = top + 0.051; S.dieWorld.set(DX, top + 0.066, 0);
     while (wires.children.length) { const w = wires.children.pop(); w.geometry.dispose(); }
-    S.fallback = () => ({ T: 30, Tc: chipT(MATS[st.mat], st.X), C: S.dieWorld, R: 1.6 });
-    const yd = top + 0.106, yp = top + 0.036;
-    for (let i = 0; i < 7; i++) {
-      const z = -0.36 + i * 0.12, z2 = z * 1.9;
-      const c = new THREE.CatmullRomCurve3([V3(-0.75, yd, z), V3(-0.45, yd + 0.42, z * 1.05), V3(0.35, yd + 0.48, (z + z2) / 2), V3(1.05, yd + 0.22, z2), V3(1.3, yp, z2)]);
-      const w = new THREE.Mesh(new THREE.TubeGeometry(c, 40, 0.022, 10), MAT3.wire); w.castShadow = true; wires.add(w);
+    S.fallback = () => ({ T: 30, Tc: Tc(), C: S.dieWorld, R: spread() * 1.5 });
+    const yd = top + 0.066, yp = top + 0.03;
+    for (const z of [-0.025, 0.025]) {
+      const c = new THREE.CatmullRomCurve3([V3(DX + 0.02, yd, z), V3(DX + 0.12, yd + 0.13, z * 1.6), V3(0.15, yd + 0.17, z * 3), V3(0.38, yd + 0.06, z * 4), V3(0.45, yp, z * 4.4)]);
+      const w = new THREE.Mesh(new THREE.TubeGeometry(c, 48, 0.015, 12), MAT3.wire); w.castShadow = true; wires.add(w);
     }
     if (S.ir) S.setIR(true);
   }
@@ -555,35 +551,34 @@ function buildChip() {
     Object.assign(st, p); layout();
     $("#chipX").value = st.X; $("#chipXo").textContent = st.X.toFixed(1) + " mm";
     $$("#chipTiles .tile").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === st.mat ? "true" : "false"));
-    const Tc = chipT(MATS[st.mat], st.X); S.range.min.value = 20; S.range.max.value = clamp(Math.max(80, Tc * 1.05), 80, 700); S.drawIRUI();
+    S.range.min.value = 20; S.range.max.value = clamp(Math.max(80, Tc() * 1.05), 80, 700); S.drawIRUI();
     if (lessons.chip) lessons.chip.check();
   };
-  S.ov.insertAdjacentHTML("beforeend", '<div class="big"><div class="n"></div><div class="s">10 W silicon chip · cooled plate at 30 °C</div><span class="badge"></span></div>' +
-    '<div class="tag" data-k="sub"></div><div class="tag" data-k="die">silicon chip</div><div class="tag" data-k="plate">water-cooled plate · 30 °C</div>');
+  S.ov.insertAdjacentHTML("beforeend", '<div class="big"><div class="n"></div><div class="s">10 W on a 1 mm × 1 mm silicon chip · plate cooled to 30 °C</div><span class="badge"></span></div>' +
+    '<div class="tag" data-k="sub"></div><div class="tag" data-k="die">silicon chip, 1 mm</div><div class="tag" data-k="plate">water-cooled plate · 30 °C</div>');
   let acc = 0;
   S.update = dt => {
-    const m = MATS[st.mat], Tc = chipT(m, st.X), hot = !m.elec && Tc > 150;
+    const m = MATS[st.mat], T = Tc(), hot = !m.elec && T > 150;
     acc += dt;
     if (!S.ir && m.elec && acc > 0.02) {
       acc = 0;
-      for (let k = 0; k < 3; k++) { const z = rnd(-0.5, 0.5); sparks.emit(V3(rnd(0.2, 1.3), S.dieWorld.y + rnd(0, 0.3), z), V3(rnd(-3, 3), rnd(1.5, 5), rnd(-3, 3)), rnd(0.15, 0.45), 0.18, 0.05, 1, 0xffe6a0, -14); }
-      if (Math.random() < 0.15) smoke.emit(S.dieWorld.clone().add(V3(1, 0.2, 0)), V3(rnd(-.2, .2), 1.2, rnd(-.2, .2)), 2.4, 0.6, 2.4, 0.5, 0x9a9da3);
-      flash.position.set(0.5, S.dieWorld.y + 0.4, 0); flash.intensity = Math.random() < 0.5 ? rnd(4, 14) : 0;
+      for (let k = 0; k < 3; k++) sparks.emit(V3(rnd(0.08, 0.2), S.dieWorld.y - 0.02, rnd(-0.5, 0.5)), V3(rnd(-0.6, 0.6), rnd(0.4, 1.2), rnd(-0.6, 0.6)), rnd(0.15, 0.4), 0.05, 0.015, 1, 0xffe6a0, -4);
+      if (Math.random() < 0.15) smoke.emit(V3(0.12, S.dieWorld.y, rnd(-.3, .3)), V3(rnd(-.05, .05), 0.3, rnd(-.05, .05)), 2.4, 0.12, 0.7, 0.5, 0x9a9da3);
+      flash.position.set(0.12, S.dieWorld.y + 0.1, 0); flash.intensity = Math.random() < 0.5 ? rnd(0.3, 1.2) : 0;
     } else if (!m.elec) flash.intensity = 0;
-    if (!S.ir && hot && Math.random() < dt * (Tc > 400 ? 26 : 12)) smoke.emit(S.dieWorld.clone().add(V3(rnd(-.4, .4), 0.1, rnd(-.4, .4))), V3(rnd(-.15, .15), rnd(0.8, 1.4), rnd(-.15, .15)), rnd(2.5, 3.6), 0.4, rnd(2.2, 3.4), Tc > 400 ? 0.7 : 0.45, Tc > 400 ? 0x5d5f63 : 0xa7aaae);
+    if (!S.ir && hot && Math.random() < dt * (T > 400 ? 26 : 12)) smoke.emit(S.dieWorld.clone().add(V3(rnd(-.04, .04), 0.02, rnd(-.04, .04))), V3(rnd(-.04, .04), rnd(0.22, 0.38), rnd(-.04, .04)), rnd(2.5, 3.6), 0.08, rnd(0.6, 0.95), T > 400 ? 0.7 : 0.45, T > 400 ? 0x5d5f63 : 0xa7aaae);
     smoke.update(dt, S.ir); sparks.update(dt, S.ir); if (S.ir) flash.intensity = 0;
   };
   S.overlay = () => {
-    const m = MATS[st.mat], Tc = chipT(m, st.X), big = $(".big", S.ov);
-    $(".n", big).textContent = m.elec ? "Short circuit" : Tc > 999 ? "> 1000 °C" : Math.round(Tc) + " °C";
-    $(".n", big).style.color = m.elec ? "#ffd56a" : Tc <= 150 ? "#8ef0a8" : "#ff8b8b";
-    const b = $(".badge", big); b.className = "badge " + (m.elec ? "warn" : Tc <= 150 ? "ok" : "bad");
-    b.textContent = m.elec ? "⚡ A metal substrate carries the current: the chip shorts out" : Tc <= 150 ? "✓ The chip is safe" : "🔥 The chip overheats";
-    const t = 0.1 + st.X * 0.08;
-    const sub = $('[data-k="sub"]', S.ov); sub.innerHTML = "<b>" + (m.long || m.name) + " substrate</b>λ " + num(m.lam, 3) + " W/m·K · " + st.X.toFixed(1) + " mm"; S.track(sub, V3(1.6, 1.4 + t / 2, 2.6));
-    S.track($('[data-k="die"]', S.ov), V3(-1.05, 1.4 + t + 0.95, 0.2));
-    S.track($('[data-k="plate"]', S.ov), V3(2.8, 0.55, 3.6));
-    const cr = $(".cross", S.irUI); S.track(cr, S.dieWorld); $("span", cr).textContent = "Sp1 " + Math.round(Tc) + " °C";
+    const m = MATS[st.mat], T = Tc(), big = $(".big", S.ov), t = st.X / 10;
+    $(".n", big).textContent = m.elec ? "Short circuit" : T > 999 ? "> 1000 °C" : Math.round(T) + " °C";
+    $(".n", big).style.color = m.elec ? "#ffd56a" : T <= 150 ? "#8ef0a8" : "#ff8b8b";
+    const b = $(".badge", big); b.className = "badge " + (m.elec ? "warn" : T <= 150 ? "ok" : "bad");
+    b.textContent = m.elec ? "⚡ A metal substrate joins the two pads: the chip shorts out" : T <= 150 ? "✓ The chip is safe" : "The chip overheats";
+    const sb = $('[data-k="sub"]', S.ov); sb.innerHTML = "<b>" + (m.long || m.name) + " substrate</b>λ " + num(m.lam, 3) + " W/m·K · " + st.X.toFixed(1) + " mm thick"; S.track(sb, V3(0.55, 0.6 + t / 2, 0.75));
+    S.track($('[data-k="die"]', S.ov), V3(DX, 0.6 + t + 0.32, 0.05));
+    S.track($('[data-k="plate"]', S.ov), V3(1.5, 0.12, 1.7));
+    const cr = $(".cross", S.irUI); S.track(cr, S.dieWorld); $("span", cr).textContent = "Sp1 " + Math.round(T) + " °C";
   };
   const host = $("#chipTiles"), LIST = ["cu", "al", "aln", "alumina", "glass", "plastic"];
   host.innerHTML = LIST.map(k => '<button class="tile" data-m="' + k + '"><i style="background:' + MATS[k].col + '"></i><span>' + MATS[k].name + '<small>λ ' + num(MATS[k].lam, 3) + '</small></span></button>').join("");
@@ -598,9 +593,9 @@ function buildTouch() {
   const S = makeScene("touch", V3(0, 24.6, 46.4), V3(0, 4.2, 0), { fov: 15 }); S.fitAspect = 1.25;
   const LIST = ["cu", "al", "steel", "stone", "glass", "plastic", "wood", "foam"];
   const st = { mat: "steel", T: 0, press: 1 }; S.st = st;
-  const block = S.add(new THREE.Mesh(new RoundedBoxGeometry(9, 4.5, 9, 5, 0.18), MAT3.steel), () => ({ T: st.T })); block.position.y = 2.25; block.userData.mesh = block;
+  const block = S.add(new THREE.Mesh(new RoundedBoxGeometry(9, 4.5, 9, 5, 0.18), MAT3.steel), () => ({ T: st.T, Tc: contactT(MATS[st.mat], st.T), C: contact, R: 0.75 })); block.position.y = 2.25;
   const finger = makeFinger(); S.scene.add(finger);
-  const contact = V3(0.3, 4.5, 0.6), dir = V3(0.16, 0.8, 0.58), nailRef = V3(0, 0.42, 1);
+  const contact = V3(-0.8, 4.5, 0.4), dir = V3(0.78, 0.6, 0.18), nailRef = V3(0, 1, 0);
   finger.userData.skin.userData.th = () => ({ T: 33, Tc: contactT(MATS[st.mat], st.T), C: contact, R: 1.1 }); S.fallback = () => ({ T: 33 });
   let lift = 0, target = 0;
   S.set = p => {
@@ -620,7 +615,7 @@ function buildTouch() {
     const m = MATS[st.mat], Tf = contactT(m, st.T), [w, c] = feel(Tf), big = $(".big", S.ov);
     $(".n", big).textContent = deg(Tf); $(".n", big).style.color = c;
     const b = $(".badge", big); b.className = "badge " + (Tf < 26 || Tf >= 44 ? "bad" : "ok"); b.textContent = w + "  ·  the " + (m.long || m.name).toLowerCase() + " is at " + deg(st.T);
-    const tg = $('[data-k="blk"]', S.ov); tg.innerHTML = "<b>" + (m.long || m.name) + "</b>at " + deg(st.T); S.track(tg, V3(-3.2, 2.2, 4.6));
+    const tg = $('[data-k="blk"]', S.ov); tg.innerHTML = "<b>" + (m.long || m.name) + "</b>at " + deg(st.T); S.track(tg, V3(-2.6, 1.6, 4.6));
     const cr = $(".cross", S.irUI); S.track(cr, contact); $("span", cr).textContent = "Sp1 " + Math.round(Tf) + " °C";
   };
   const host = $("#touchTiles");
