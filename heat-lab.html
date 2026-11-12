@@ -3,10 +3,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* One big scene per tab. A lesson card floats on the scene; big tiles sit in a dock under it. */
 :root {
   --paper: #f3f5f8; --panel: #ffffff; --ink: #17212c; --muted: #5d6877; --rule: #d3dae2; --soft: #e9edf2;
-  --stage: #e6ebf1; --stage2: #f8fafc;
   --accent: #a51c30; --teal: #1d7486; --amber: #b97d0c; --good: #2f7d4a;
   --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 16px rgba(16, 24, 40, .10);
   --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
@@ -15,17 +13,9 @@
   --barH: 58px;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0e1318; --panel: #161d26; --ink: #e8edf3; --muted: #a0acba; --rule: #2a333e; --soft: #1e2630;
-    --stage: #0a0e13; --stage2: #151c25; --accent: #ef6a7e; --teal: #55bccd; --amber: #e8b04a; --good: #62c483;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 4px 18px rgba(0, 0, 0, .4); color-scheme: dark;
-  }
+  :root:not([data-theme="light"]) { --paper: #0e1318; --panel: #161d26; --ink: #e8edf3; --muted: #a0acba; --rule: #2a333e; --soft: #1e2630; --accent: #ef6a7e; --teal: #55bccd; --amber: #e8b04a; --good: #62c483; --shadow: 0 1px 2px rgba(0,0,0,.45), 0 4px 18px rgba(0,0,0,.4); color-scheme: dark; }
 }
-:root[data-theme="dark"] {
-  --paper: #0e1318; --panel: #161d26; --ink: #e8edf3; --muted: #a0acba; --rule: #2a333e; --soft: #1e2630;
-  --stage: #0a0e13; --stage2: #151c25; --accent: #ef6a7e; --teal: #55bccd; --amber: #e8b04a; --good: #62c483;
-  --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 4px 18px rgba(0, 0, 0, .4); color-scheme: dark;
-}
+:root[data-theme="dark"] { --paper: #0e1318; --panel: #161d26; --ink: #e8edf3; --muted: #a0acba; --rule: #2a333e; --soft: #1e2630; --accent: #ef6a7e; --teal: #55bccd; --amber: #e8b04a; --good: #62c483; --shadow: 0 1px 2px rgba(0,0,0,.45), 0 4px 18px rgba(0,0,0,.4); color-scheme: dark; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
@@ -47,37 +37,57 @@ nav.tabs button[aria-selected="true"] { color: #fff; background: var(--accent); 
 .ibtn:hover { border-color: var(--muted); }
 .ibtn svg { width: 18px; height: 18px; }
 @media (max-width: 1100px) { .ibtn .lbl { display: none; } }
-@media (max-width: 760px) {
-  .bar .in { flex-wrap: wrap; gap: 0 10px; padding-top: 8px; }
-  nav.tabs { order: 3; flex-basis: 100%; padding: 4px 0 8px; }
-  nav.tabs button { font-size: 15px; padding: 9px 11px; }
-}
+@media (max-width: 760px) { .bar .in { flex-wrap: wrap; gap: 0 10px; padding-top: 8px; } nav.tabs { order: 3; flex-basis: 100%; padding: 4px 0 8px; } nav.tabs button { font-size: 15px; padding: 9px 11px; } }
 
 main { max-width: 1800px; margin: 0 auto; padding: 12px 16px 16px; }
 .scene { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 10px; height: calc(100vh - var(--barH) - 28px); height: calc(100dvh - var(--barH) - 28px); min-height: 560px; }
-.stage { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--rule); background: radial-gradient(130% 100% at 50% 0%, var(--stage2), var(--stage)); min-height: 0; }
-.stage > canvas { position: absolute; inset: 0; display: block; touch-action: none; }
-.stage.drag > canvas { cursor: ns-resize; }
+.stage { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--rule); background: #2a2d31; min-height: 0; }
+.stage.flat { background: radial-gradient(130% 100% at 50% 0%, #fbfcfd, #e9eef3); }
+:root[data-theme="dark"] .stage.flat { background: radial-gradient(130% 100% at 50% 0%, #151c25, #0a0e13); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .stage.flat { background: radial-gradient(130% 100% at 50% 0%, #151c25, #0a0e13); } }
+.gl { position: absolute; inset: 0; }
+.gl canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.gl canvas:active { cursor: grabbing; }
+.stage > canvas { position: absolute; inset: 0; display: block; touch-action: none; cursor: ns-resize; }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; color: #dfe4ea; font: 700 18px var(--body); background: #2a2d31; z-index: 3; }
 
-/* dock: big tiles + one slider + action */
-.dock { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+/* overlays on the 3D view */
+.ov { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.big { position: absolute; top: 18px; left: calc(50% + 200px); transform: translateX(-50%); text-align: center; color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.55); white-space: nowrap; }
+.big .n { font: 900 76px/1 var(--display); letter-spacing: -0.02em; }
+.big .s { font: 700 19px/1.3 var(--body); opacity: .92; margin-top: 4px; }
+.badge { display: inline-block; margin-top: 10px; font: 800 20px var(--display); padding: 7px 14px; border-radius: 10px; color: #fff; text-shadow: none; }
+.badge.ok { background: #2f7d4a; } .badge.bad { background: #a51c30; } .badge.warn { background: #9a6c00; }
+.tag { position: absolute; transform: translate(-50%, -50%); font: 700 14.5px/1.25 var(--body); color: #fff; background: rgba(15,18,22,.62); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); padding: 5px 9px; border-radius: 8px; white-space: nowrap; text-align: center; }
+.tag b { font: 800 16px var(--display); display: block; }
+.tag.hot { background: rgba(165,28,48,.88); } .tag.win { background: rgba(47,125,74,.9); }
+.irui { position: absolute; right: 16px; top: 16px; bottom: 16px; width: 64px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #fff; font: 700 13px var(--mono); }
+.irui .bar { flex: 1; width: 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,.5); background: linear-gradient(to top, #000 0%, #1f0061 15%, #8c0099 35%, #e02e2e 55%, #ff8c00 72%, #ffe040 88%, #fffff0 100%); }
+.irhead { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); color: #fff; font: 700 14px var(--mono); background: rgba(0,0,0,.55); padding: 4px 10px; border-radius: 6px; }
+.cross { position: absolute; width: 34px; height: 34px; transform: translate(-50%, -50%); border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px rgba(0,0,0,.5); }
+.cross::before, .cross::after { content: ""; position: absolute; background: #fff; }
+.cross::before { left: 50%; top: -9px; bottom: -9px; width: 2px; transform: translateX(-50%); }
+.cross::after { top: 50%; left: -9px; right: -9px; height: 2px; transform: translateY(-50%); }
+.cross span { position: absolute; left: 30px; top: -26px; font: 700 15px var(--mono); color: #fff; background: rgba(0,0,0,.6); padding: 2px 7px; border-radius: 5px; white-space: nowrap; }
+
+.dock { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
 .tiles { display: flex; flex-wrap: wrap; gap: 8px; }
-.tile { min-width: 104px; padding: 9px 14px 9px 12px; border-radius: 12px; border: 2px solid var(--rule); background: var(--panel); cursor: pointer; display: flex; align-items: center; gap: 10px; font: 700 16px/1.15 var(--body); text-align: left; }
-.tile i { width: 26px; height: 26px; border-radius: 7px; flex: none; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); }
+.tile { min-width: 100px; padding: 8px 13px 8px 9px; border-radius: 12px; border: 2px solid var(--rule); background: var(--panel); cursor: pointer; display: flex; align-items: center; gap: 10px; font: 700 16px/1.15 var(--body); text-align: left; }
+.tile i { width: 30px; height: 30px; border-radius: 7px; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.18); background-size: cover; }
 .tile small { display: block; font: 600 13px var(--mono); color: var(--muted); margin-top: 2px; }
 .tile:hover { border-color: var(--muted); }
 .tile[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
-.slide { display: flex; align-items: center; gap: 12px; flex: 1 1 260px; max-width: 520px; font: 700 16px var(--body); }
+.slide { display: flex; align-items: center; gap: 12px; flex: 1 1 240px; max-width: 480px; font: 700 16px var(--body); }
 .slide input { flex: 1; accent-color: var(--accent); height: 28px; }
-.slide output { font: 700 18px var(--mono); color: var(--accent); min-width: 78px; text-align: right; }
-.go { font: 800 18px var(--display); padding: 12px 26px; border-radius: 12px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+.slide output { font: 700 18px var(--mono); color: var(--accent); min-width: 70px; text-align: right; }
+.go { font: 800 18px var(--display); padding: 12px 24px; border-radius: 12px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
 .go:hover { filter: brightness(1.08); }
 .pill { font: 700 15px var(--body); padding: 9px 14px; border-radius: 999px; border: 2px solid var(--rule); background: var(--panel); cursor: pointer; }
 .pill:hover { border-color: var(--muted); }
 .pill[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: #fff; }
+.pill.ir[aria-pressed="true"] { border-color: #ff8c00; background: linear-gradient(90deg, #1f0061, #8c0099, #e02e2e, #ff8c00); }
 
-/* lesson card */
-.lesson { position: absolute; top: 14px; left: 14px; width: min(400px, calc(100% - 28px)); z-index: 5; background: color-mix(in srgb, var(--panel) 94%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--rule); border-radius: 14px; box-shadow: var(--shadow); padding: 14px 16px 14px; display: grid; gap: 10px; }
+.lesson { position: absolute; top: 14px; left: 14px; width: min(390px, calc(100% - 28px)); z-index: 5; background: color-mix(in srgb, var(--panel) 95%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--rule); border-radius: 14px; box-shadow: var(--shadow); padding: 14px 16px; display: grid; gap: 10px; color: var(--ink); }
 .lesson .top { display: flex; align-items: center; gap: 8px; }
 .lesson .kind { font: 800 12.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; color: #fff; background: var(--amber); }
 .lesson .kind.try { background: var(--teal); } .lesson .kind.idea { background: var(--accent); }
@@ -105,9 +115,8 @@ main { max-width: 1800px; margin: 0 auto; padding: 12px 16px 16px; }
 .lesson.mini > :not(.top) { display: none; }
 .lesson.mini .top .min { display: none; }
 
-/* key ideas sheet */
-dialog { border: 0; border-radius: 18px; padding: 0; max-width: min(1100px, 94vw); width: 100%; background: var(--paper); color: var(--ink); box-shadow: 0 20px 60px rgba(0, 0, 0, .35); }
-dialog::backdrop { background: rgba(10, 14, 20, .55); }
+dialog { border: 0; border-radius: 18px; padding: 0; max-width: min(1100px, 94vw); width: 100%; background: var(--paper); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+dialog::backdrop { background: rgba(10,14,20,.55); }
 .ideas { padding: 22px; display: grid; gap: 14px; }
 .ideas h2 { margin: 0; font: 800 26px var(--display); display: flex; justify-content: space-between; align-items: center; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
@@ -120,14 +129,15 @@ dialog::backdrop { background: rgba(10, 14, 20, .55); }
 .srcs { font-size: 13px; color: var(--muted); margin: 0; }
 
 body.present { font-size: 19px; }
-body.present .lesson { width: min(460px, calc(100% - 28px)); }
 body.present .lesson .q { font-size: 22px; }
-
 @media (max-width: 860px) {
   .scene { height: auto; min-height: 0; grid-template-rows: auto auto auto; }
-  .stage { height: min(68vh, 560px); min-height: 380px; }
-  .lesson { position: static; width: auto; order: 3; backdrop-filter: none; }
-  .tile { min-width: 0; padding: 8px 10px; font-size: 15px; }
+  .stage { height: min(70vh, 560px); min-height: 400px; }
+  .lesson { position: static; width: auto; backdrop-filter: none; }
+  .big { left: 50%; top: 12px; } .big .n { font-size: 48px; } .big .s { font-size: 15px; } .badge { font-size: 16px; }
+  .tile { min-width: 0; padding: 7px 10px 7px 8px; font-size: 15px; }
+  .irui { width: 46px; right: 8px; }
+  .tag { font-size: 12.5px; padding: 4px 7px; } .tag b { font-size: 13.5px; }
 }
 </style>
 
@@ -150,27 +160,29 @@ body.present .lesson .q { font-size: 22px; }
 
 <main>
   <section class="scene" id="s-chip">
-    <div class="stage"><canvas id="cvChip" aria-label="A chip on a heat-sink plate"></canvas><div class="lesson" data-lesson="chip"></div></div>
+    <div class="stage"><div class="gl"></div><div class="ov" id="ovChip"></div><div class="loading">Loading the 3D bench…</div><div class="lesson" data-lesson="chip"></div></div>
     <div class="dock"><div class="tiles" id="chipTiles"></div>
-      <label class="slide">Plate <input type="range" id="chipX" min="0.5" max="4" step="0.1" value="2" aria-label="Plate thickness"><output id="chipXo">2.0 mm</output></label></div>
+      <label class="slide">Substrate <input type="range" id="chipX" min="0.5" max="4" step="0.1" value="2" aria-label="Substrate thickness"><output id="chipXo">2.0 mm</output></label>
+      <button class="pill ir" data-ir="chip" aria-pressed="false">📷 Thermal camera</button></div>
   </section>
 
   <section class="scene" id="s-touch" hidden>
-    <div class="stage"><canvas id="cvTouch" aria-label="A finger touching eight materials at the same temperature"></canvas><div class="lesson" data-lesson="touch"></div></div>
-    <div class="dock">
-      <div class="tiles"><button class="pill" data-t="0">❄️ Winter bench 0 °C</button><button class="pill" data-t="33">🖐 Body 33 °C</button><button class="pill" data-t="80">🔥 Sauna 80 °C</button></div>
-      <label class="slide">Everything is at <input type="range" id="touchT" min="-20" max="90" step="1" value="0" aria-label="Temperature of the materials"><output id="touchTo">0 °C</output></label>
-    </div>
+    <div class="stage"><div class="gl"></div><div class="ov" id="ovTouch"></div><div class="loading">Loading the 3D bench…</div><div class="lesson" data-lesson="touch"></div></div>
+    <div class="dock"><div class="tiles" id="touchTiles"></div>
+      <div class="tiles"><button class="pill" data-t="0">❄️ 0 °C</button><button class="pill" data-t="33">🖐 33 °C</button><button class="pill" data-t="80">🔥 Sauna 80 °C</button></div>
+      <label class="slide">Block at <input type="range" id="touchT" min="-20" max="90" step="1" value="0" aria-label="Temperature of the block"><output id="touchTo">0 °C</output></label>
+      <button class="pill ir" data-ir="touch" aria-pressed="false">📷 Thermal camera</button></div>
   </section>
 
   <section class="scene" id="s-cup" hidden>
-    <div class="stage"><canvas id="cvCup" aria-label="Four cups filled with boiling water at once"></canvas><div class="lesson" data-lesson="cup"></div></div>
-    <div class="dock"><button class="go" id="cupGo">☕ Pour boiling water</button>
-      <label class="slide">Wall <input type="range" id="cupW" min="1" max="6" step="0.5" value="3" aria-label="Wall thickness"><output id="cupWo">3 mm</output></label></div>
+    <div class="stage"><div class="gl"></div><div class="ov" id="ovCup"></div><div class="loading">Loading the 3D bench…</div><div class="lesson" data-lesson="cup"></div></div>
+    <div class="dock"><button class="go" id="cupGo">☕ Pour boiling tea</button>
+      <label class="slide">Wall <input type="range" id="cupW" min="1" max="6" step="0.5" value="3" aria-label="Wall thickness"><output id="cupWo">3 mm</output></label>
+      <button class="pill ir" data-ir="cup" aria-pressed="false">📷 Thermal camera</button></div>
   </section>
 
   <section class="scene" id="s-wall" hidden>
-    <div class="stage drag"><canvas id="cvWall" aria-label="Conductivity against diffusivity chart; drag to move the selection line"></canvas><div class="lesson" data-lesson="wall"></div></div>
+    <div class="stage flat"><canvas id="cvWall" aria-label="Thermal conductivity against thermal diffusivity chart; drag to move the selection line"></canvas><div class="lesson" data-lesson="wall"></div></div>
     <div class="dock"><div class="tiles" id="goalTiles">
       <button class="pill" data-g="months" aria-pressed="true">❄️ Cold room, months</button>
       <button class="pill" data-g="hour">⏱ Hold out 1 hour</button>
@@ -183,66 +195,21 @@ body.present .lesson .q { font-size: 22px; }
   <div class="ideas">
     <h2>Four key ideas <button class="ibtn" id="ideasClose" aria-label="Close">✕</button></h2>
     <div class="cards">
-      <div class="card"><div class="e">🔌</div><h3>Move heat</h3><div class="eq">ΔT = q·X / λ</div><p>Heat flowing steadily through a plate needs a temperature drop. High conductivity λ makes the drop small.</p><p><b>Decision:</b> screen out electrical conductors, then rank on λ → aluminum nitride under chips.</p></div>
+      <div class="card"><div class="e">🔌</div><h3>Move heat</h3><div class="eq">ΔT = q·X / λ</div><p>Heat flowing steadily through a plate needs a temperature drop. High conductivity λ makes the drop small.</p><p><b>Decision:</b> screen out electrical conductors, then rank on λ → aluminum nitride under power chips.</p></div>
       <div class="card"><div class="e">✋</div><h3>Feel heat</h3><div class="eq">pull ∝ √(λρC<sub>p</sub>)</div><p>You feel the contact temperature. Materials that conduct well and store a lot of heat drag your skin to their own temperature.</p><p><b>Decision:</b> wooden sauna benches. The same group, λ/a<sup>½</sup>, picks a heat-storing sun wall.</p></div>
       <div class="card"><div class="e">☕</div><h3>Delay heat</h3><div class="eq">t ≈ x² / 2a</div><p>Diffusivity a = λ/ρC<sub>p</sub> sets how fast a temperature change creeps through a wall. Twice as thick, four times as long.</p><p><b>Decision:</b> for a short trip, lowest a (solid rubber); for months, lowest λ (foam).</p></div>
       <div class="card"><div class="e">🏆</div><h3>Choose</h3><div class="eq">goal → index</div><p>One λ–a chart, four goals: min λ (months), min a (an hour), max λ/a<sup>½</sup> (sun wall), max a<sup>½</sup>/λ (kiln).</p><p><b>Decisions:</b> foam, rubber, concrete, refractory brick.</p></div>
     </div>
-    <p class="srcs">Ashby, <em>Materials Selection in Mechanical Design</em> 6e, Eqs 2.13–2.15, §§5.13–5.18, Tables 5.26, 5.28, C.7 and A.6; Callister &amp; Rethwisch, <em>Materials Science and Engineering</em> 10e, Table 19.1 and Appendix B. One representative property value per material. Temperatures come from exact one-dimensional solutions of the heat equation; the touch test uses the contact temperature of two touching solids in the first seconds.</p>
+    <p class="srcs">Ashby, <em>Materials Selection in Mechanical Design</em> 6e, Eqs 2.13–2.15, §§5.13–5.18, Tables 5.26, 5.28, C.7 and A.6; Callister &amp; Rethwisch, <em>Materials Science and Engineering</em> 10e, Table 19.1 and Appendix B. One representative property value per material. Temperatures come from exact one-dimensional solutions of the heat equation; the touch test uses the contact temperature of two touching solids in the first seconds. The thermal-camera view shows true surface temperature. Studio lighting and wood textures: Poly Haven (CC0).</p>
   </div>
 </dialog>
 
 <script>
 "use strict";
-const $ = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
-const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const num = (x, d = 2) => (+x.toPrecision(d)).toLocaleString("en-US").replace("-", "−");
-const deg = T => (T < -0.5 ? "−" : "") + Math.abs(Math.round(T)) + " °C";
-function fmtTime(s) {
-  if (s < 60) return num(s, 2) + " s";
-  if (s < 3600) return num(s / 60, 2) + " min";
-  return num(s / 3600, 2) + " h";
-}
-function fit(cv) {
-  const r = cv.parentElement.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
-  const W = Math.max(50, Math.floor(r.width)), H = Math.max(50, Math.floor(r.height));
-  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.width = W + "px"; cv.style.height = H + "px"; }
-  const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-  return { ctx, W, H };
-}
-const pal = () => ({ ink: cssv("--ink"), muted: cssv("--muted"), rule: cssv("--rule"), panel: cssv("--panel"), soft: cssv("--soft"), accent: cssv("--accent"), teal: cssv("--teal"), amber: cssv("--amber"), good: cssv("--good") });
-const F = (w, s) => w + " " + Math.round(s) + "px 'Archivo', 'Helvetica Neue', Arial, sans-serif";
-const B = (w, s) => w + " " + Math.round(s) + "px 'Source Sans 3', system-ui, sans-serif";
-const TSTOPS = [[-20, [40, 80, 160]], [5, [90, 150, 210]], [22, [232, 228, 220]], [45, [240, 170, 80]], [80, [222, 90, 50]], [150, [175, 30, 40]], [400, [110, 10, 25]]];
-function tColor(T, alpha = 1) {
-  let c = TSTOPS[TSTOPS.length - 1][1];
-  if (T <= TSTOPS[0][0]) c = TSTOPS[0][1];
-  else for (let i = 1; i < TSTOPS.length; i++) if (T <= TSTOPS[i][0]) { const [t0, c0] = TSTOPS[i - 1], [t1, c1] = TSTOPS[i], f = (T - t0) / (t1 - t0); c = c0.map((v, k) => Math.round(v + (c1[k] - v) * f)); break; }
-  return "rgba(" + c.join(",") + "," + alpha + ")";
-}
-function rr(ctx, x, y, w, h, r) { r = Math.max(0, Math.min(r, w / 2, h / 2)); ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
-/* a finger pointing along +x (rotate the context to aim it); its tip is at the origin */
-function finger(ctx, len, wid, tip) {
-  ctx.save();
-  ctx.fillStyle = "#e8b08c"; ctx.strokeStyle = "rgba(90,50,30,.35)"; ctx.lineWidth = 1.2;
-  rr(ctx, -len, -wid / 2, len, wid, wid / 2); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = "rgba(255,235,220,.85)"; rr(ctx, -wid * 0.95, -wid * 0.36, wid * 0.62, wid * 0.4, wid * 0.16); ctx.fill();
-  ctx.strokeStyle = "rgba(90,50,30,.25)"; ctx.beginPath(); ctx.moveTo(-len * 0.45, -wid * 0.32); ctx.lineTo(-len * 0.45, wid * 0.32); ctx.stroke();
-  if (tip) { const g = ctx.createRadialGradient(-wid * 0.25, 0, 1, -wid * 0.25, 0, wid * 0.9); g.addColorStop(0, tip); g.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(-wid * 0.25, 0, wid * 0.9, 0, 7); ctx.fill(); }
-  ctx.restore();
-}
-function label(ctx, txt, x, y, font, fill, bg, pad = 6) {
-  ctx.font = font; const w = ctx.measureText(txt).width, h = parseInt(font.match(/(\d+)px/)[1], 10);
-  ctx.fillStyle = bg; rr(ctx, x - w / 2 - pad, y - h / 2 - pad * 0.7, w + 2 * pad, h + pad * 1.4, 8); ctx.fill();
-  ctx.fillStyle = fill; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(txt, x, y + 1);
-}
-
 /* ======================================================= physics (tests/physics-test.js runs this block) */
 /*PHYSICS-START*/
 function erfc(x) { const z = Math.abs(x), t = 1 / (1 + 0.3275911 * z); const y = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429)))) * Math.exp(-z * z); return x >= 0 ? y : 2 - y; }
-/* Slab 0<=xi<=1, initially theta=0; from t=0 the face xi=0 is held at theta=1; the face xi=1 is sealed (no heat crosses it).
+/* Slab 0<=xi<=1, initially theta=0; from t=0 the face xi=0 is held at theta=1; the face xi=1 is sealed.
    Exact: image sums below Fo = 0.05, Fourier series above. Fo = a t / w^2. */
 function slabTheta(xi, Fo) {
   if (Fo <= 0) return xi <= 0 ? 1 : 0;
@@ -268,58 +235,592 @@ const MATS = {
   al:        { name: "Aluminum", lam: 247, rho: 2710, cp: 900, elec: true, tmax: 150, col: "#b8c0c9", src: "Callister T19.1, B.1" },
   steel:     { name: "Steel", long: "Stainless steel", lam: 15.9, rho: 8000, cp: 502, elec: true, tmax: 800, col: "#8e979f", src: "Callister T19.1 (316 stainless)" },
   ti:        { name: "Titanium", lam: 7.0, rho: 4430, cp: 560, elec: true, tmax: 450, cost: 200000, col: "#9aa0b5", src: "typical Ti-6Al-4V" },
-  aln:       { name: "AlN", long: "Aluminum nitride", lam: 170, rho: 3260, cp: 740, elec: false, tmax: 1200, col: "#d8d2bd", src: "Ashby T A.6 (140–200)" },
+  aln:       { name: "AlN", long: "Aluminum nitride", lam: 170, rho: 3260, cp: 740, elec: false, tmax: 1200, col: "#bdb6a6", src: "Ashby T A.6 (140–200)" },
   alumina:   { name: "Alumina", lam: 33, rho: 3980, cp: 775, elec: false, tmax: 1500, col: "#f1eee5", src: "Ashby T A.6 (26–39); Callister Cp" },
   glass:     { name: "Glass", lam: 1.1, rho: 2450, cp: 800, elec: false, tmax: 450, cost: 10000, col: "#a9dbe0", src: "Ashby p. 37" },
-  stone:     { name: "Stone", lam: 3.0, rho: 2650, cp: 790, elec: false, tmax: 500, cost: 1400, col: "#8f8a80", src: "typical granite" },
+  stone:     { name: "Stone", long: "Granite", lam: 3.0, rho: 2650, cp: 790, elec: false, tmax: 500, cost: 1400, col: "#8f8a80", src: "typical granite" },
   concrete:  { name: "Concrete", lam: 2.0, rho: 2300, cp: 850, elec: false, tmax: 400, cost: 200, col: "#a7a49c", src: "typical" },
   brick:     { name: "Brick", lam: 0.7, rho: 1800, cp: 840, elec: false, tmax: 1000, cost: 1400, col: "#b2543a", src: "typical" },
   adobe:     { name: "Adobe", lam: 0.8, rho: 1600, cp: 900, elec: false, tmax: 600, cost: 100, costTxt: "0–200", col: "#c49a6c", src: "typical" },
   firebrick: { name: "Refractory brick", lam: 0.20, rho: 500, cp: 900, elec: false, tmax: 1400, col: "#e2cfa6", src: "typical insulating firebrick" },
   aerated:   { name: "Aerated concrete", lam: 0.30, rho: 700, cp: 1000, elec: false, tmax: 1100, col: "#d6d4cc", src: "typical high-temperature grade" },
   plastic:   { name: "Plastic", long: "Polypropylene", lam: 0.12, rho: 905, cp: 1925, elec: false, tmax: 100, col: "#f1e7c7", src: "Callister T19.1, B.1 (polypropylene)" },
-  wood:      { name: "Wood", lam: 0.12, rho: 500, cp: 1600, elec: false, tmax: 150, col: "#c9965b", src: "typical pine, across the grain" },
+  wood:      { name: "Wood", long: "Pine", lam: 0.12, rho: 500, cp: 1600, elec: false, tmax: 150, col: "#c9965b", src: "typical pine, across the grain" },
   neoprene:  { name: "Rubber", long: "Neoprene rubber", lam: 0.12, rho: 1240, cp: 2000, elec: false, tmax: 100, col: "#3d3f44", src: "typical; a ≈ 5 × 10⁻⁸ as in Ashby §5.13" },
   cork:      { name: "Cork", lam: 0.045, rho: 160, cp: 1900, elec: false, tmax: 120, col: "#b88a5a", src: "typical" },
   foam:      { name: "Foam", long: "Polystyrene foam", lam: 0.035, rho: 30, cp: 1300, elec: false, tmax: 80, col: "#f6f6f2", src: "typical rigid foam" }
 };
 for (const k in MATS) { const m = MATS[k]; m.id = k; m.a = m.lam / (m.rho * m.cp); m.e = eff(m); }
 /*PHYSICS-END*/
+</script>
 
-/* ======================================================= shell: tabs, theme, present, ideas, animation */
-const scenes = {}; let active = "chip";
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const num = (x, d = 2) => (+x.toPrecision(d)).toLocaleString("en-US").replace("-", "−");
+const deg = T => (T < -0.5 ? "−" : "") + Math.abs(Math.round(T)) + " °C";
+const fmtTime = s => s < 60 ? num(s, 2) + " s" : s < 3600 ? num(s / 60, 2) + " min" : num(s / 3600, 2) + " h";
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const rnd = (a = 0, b = 1) => a + Math.random() * (b - a);
+const lessons = {};
+
+/* ======================================================= renderer, studio lighting, textures */
+let renderer = null;
+try { renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" }); } catch (e) { renderer = null; }
+const scenes3d = {};
+if (renderer) {
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+} else $$(".loading").forEach(l => { l.textContent = "This view needs WebGL. Try another browser or turn on hardware acceleration."; });
+
+const texLoader = new THREE.TextureLoader();
+function tex(url, srgb, rep = 1) { const t = texLoader.load(url); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep); t.anisotropy = 8; return t; }
+function canvasTex(w, h, draw, srgb = false) {
+  const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
+  const t = new THREE.CanvasTexture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; return t;
+}
+const TX = {};
+function buildTextures() {
+  TX.oakD = tex("assets/oak_veneer_01_diff_1k.jpg", true, 9); TX.oakR = tex("assets/oak_veneer_01_rough_1k.jpg", false, 9); TX.oakN = tex("assets/oak_veneer_01_nor_gl_1k.jpg", false, 9);
+  TX.pineD = tex("assets/coated_pine_diff_1k.jpg", true); TX.pineR = tex("assets/coated_pine_rough_1k.jpg"); TX.pineN = tex("assets/coated_pine_nor_gl_1k.jpg");
+  // brushed metal: fine streaks
+  TX.brushed = canvasTex(1024, 1024, (g, w, h) => { g.fillStyle = "#808080"; g.fillRect(0, 0, w, h); for (let i = 0; i < 14000; i++) { const v = 100 + Math.random() * 60 | 0; g.fillStyle = `rgba(${v},${v},${v},${0.05 + Math.random() * 0.12})`; g.fillRect(Math.random() * w, Math.random() * h, 60 + Math.random() * 500, 1); } });
+  TX.micro = canvasTex(512, 512, (g, w, h) => { const d = g.createImageData(w, h); for (let i = 0; i < d.data.length; i += 4) { const v = 118 + Math.random() * 20; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); });
+  // polished granite: quartz, feldspar, biotite grains
+  TX.granite = canvasTex(1024, 1024, (g, w, h) => {
+    g.fillStyle = "#9b938c"; g.fillRect(0, 0, w, h);
+    const cols = ["#d8d3cc", "#e6e1db", "#b98e80", "#c7a092", "#2a2624", "#3b3532", "#77706a", "#f2efe9"];
+    for (let i = 0; i < 26000; i++) { g.fillStyle = cols[Math.random() * cols.length | 0]; g.globalAlpha = 0.55 + Math.random() * 0.45; const s = 1 + Math.random() * Math.random() * 9; g.beginPath(); g.ellipse(Math.random() * w, Math.random() * h, s, s * (0.5 + Math.random() * 0.6), Math.random() * 3, 0, 7); g.fill(); }
+    g.globalAlpha = 1;
+  }, true);
+  // expanded polystyrene: fused beads
+  TX.beads = canvasTex(1024, 1024, (g, w, h) => {
+    g.fillStyle = "#c9c9c4"; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 4200; i++) { const x = Math.random() * w, y = Math.random() * h, r = 7 + Math.random() * 8; const gr = g.createRadialGradient(x - r * 0.3, y - r * 0.3, 1, x, y, r); gr.addColorStop(0, "#ffffff"); gr.addColorStop(0.75, "#f1f1ec"); gr.addColorStop(1, "#cfcfc8"); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+  }, true);
+  // silicon die: blocks of circuitry, bus lines and bond pads
+  TX.die = canvasTex(1024, 1024, (g, w, h) => {
+    g.fillStyle = "#1c2433"; g.fillRect(0, 0, w, h);
+    const blocks = ["#26324a", "#2f2a48", "#203348", "#2b3a4f", "#352d45"];
+    for (let i = 0; i < 160; i++) { g.fillStyle = blocks[i % blocks.length]; g.fillRect(60 + Math.random() * 840, 60 + Math.random() * 840, 20 + Math.random() * 160, 20 + Math.random() * 160); }
+    g.strokeStyle = "rgba(150,170,200,.25)"; g.lineWidth = 1;
+    for (let i = 0; i < 900; i++) { g.beginPath(); const x = 60 + Math.random() * 900, y = 60 + Math.random() * 900; g.moveTo(x, y); Math.random() < .5 ? g.lineTo(x + Math.random() * 120, y) : g.lineTo(x, y + Math.random() * 120); g.stroke(); }
+    g.fillStyle = "#c8ccd2"; for (let k = 0; k < 14; k++) { g.fillRect(70 + k * 62, 18, 38, 30); g.fillRect(70 + k * 62, h - 48, 38, 30); g.fillRect(18, 70 + k * 62, 30, 38); g.fillRect(w - 48, 70 + k * 62, 30, 38); }
+    g.fillStyle = "#d9dde2"; g.fillRect(560, 300, 340, 420);  // emitter metallization for the power wires
+    g.strokeStyle = "#8b96a6"; g.lineWidth = 3; g.strokeRect(6, 6, w - 12, h - 12);
+  }, true);
+  TX.smoke = canvasTex(128, 128, (g, w, h) => { for (let i = 0; i < 24; i++) { const x = 64 + rnd(-22, 22), y = 64 + rnd(-22, 22), r = rnd(18, 42); const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, "rgba(255,255,255,.22)"); gr.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = gr; g.fillRect(0, 0, w, h); } }, true);
+  TX.spark = canvasTex(64, 64, (g, w, h) => { const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(.25, "rgba(255,230,140,.9)"); gr.addColorStop(.6, "rgba(255,150,40,.25)"); gr.addColorStop(1, "rgba(255,120,0,0)"); g.fillStyle = gr; g.fillRect(0, 0, w, h); }, true);
+}
+
+/* physically based materials for every material in the lab */
+const MAT3 = {};
+function buildMaterials() {
+  const P = o => new THREE.MeshPhysicalMaterial(o), C = c => new THREE.Color(c);
+  MAT3.cu = P({ color: C("#f0a07c"), metalness: 1, roughness: 0.32, roughnessMap: TX.micro });
+  MAT3.al = P({ color: C("#e6e9ec"), metalness: 1, roughness: 0.34, roughnessMap: TX.brushed });
+  MAT3.steel = P({ color: C("#d2d6da"), metalness: 1, roughness: 0.3, roughnessMap: TX.brushed });
+  MAT3.aln = P({ color: C("#b9b3a5"), roughness: 0.55, roughnessMap: TX.micro, clearcoat: 0.08 });
+  MAT3.alumina = P({ color: C("#f4f1e8"), roughness: 0.42, roughnessMap: TX.micro, clearcoat: 0.12 });
+  MAT3.glass = P({ color: C("#ffffff"), roughness: 0.02, transmission: 1, ior: 1.52, thickness: 0.6, attenuationColor: C("#cfeee4"), attenuationDistance: 12, specularIntensity: 1 });
+  MAT3.plastic = P({ color: C("#f6f3ea"), roughness: 0.3, transmission: 0.72, thickness: 0.3, ior: 1.49, attenuationColor: C("#efe6cf"), attenuationDistance: 3 });
+  MAT3.stone = P({ map: TX.granite, roughness: 0.18, clearcoat: 0.4, clearcoatRoughness: 0.15 });
+  MAT3.wood = P({ map: TX.pineD, roughnessMap: TX.pineR, normalMap: TX.pineN, roughness: 1, clearcoat: 0.15, clearcoatRoughness: 0.5 });
+  MAT3.foam = P({ map: TX.beads, bumpMap: TX.beads, bumpScale: 1.2, roughness: 0.92 });
+  MAT3.tinned = P({ color: C("#d6d8da"), metalness: 1, roughness: 0.3 });
+  MAT3.brass = P({ color: C("#d8b46a"), metalness: 1, roughness: 0.32 });
+  MAT3.screw = P({ color: C("#3a3d42"), metalness: 1, roughness: 0.4 });
+  MAT3.die = P({ map: TX.die, metalness: 0.35, roughness: 0.16, clearcoat: 0.6, clearcoatRoughness: 0.05 });
+  MAT3.wire = P({ color: C("#e4e7ea"), metalness: 1, roughness: 0.25 });
+  MAT3.solder = P({ color: C("#a9adb3"), metalness: 1, roughness: 0.35 });
+  MAT3.tube = P({ color: C("#d8eeff"), roughness: 0.12, transmission: 0.9, thickness: 0.8, ior: 1.45, attenuationColor: C("#2f86d6"), attenuationDistance: 1.4 });
+  MAT3.tea = P({ color: C("#7a3d14"), roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.03 });
+  MAT3.table = new THREE.MeshStandardMaterial({ map: TX.oakD, roughnessMap: TX.oakR, normalMap: TX.oakN, roughness: 1 });
+  MAT3.skin = P({ bumpScale: 0.6, roughness: 0.52, sheen: 0.7, sheenColor: C("#ff9a84"), sheenRoughness: 0.5, clearcoat: 0.06, clearcoatRoughness: 0.6 });
+  MAT3.nail = P({ color: C("#f0c3b4"), roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.06, side: THREE.DoubleSide });
+  MAT3.nailTip = P({ color: C("#f6ece4"), roughness: 0.25, clearcoat: 0.8, side: THREE.DoubleSide });
+}
+
+/* ======================================================= thermal camera: iron palette on true surface temperature */
+const IR_VS = `varying vec3 vW; varying vec3 vN; void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; vN = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * viewMatrix * w; }`;
+const IR_FS = `uniform float uMin, uMax, uT, uTc, uR, uMode; uniform vec3 uC; varying vec3 vW; varying vec3 vN;
+vec3 iron(float t){ t = clamp(t, 0.0, 1.0);
+  vec3 a = vec3(0.0), b = vec3(0.12,0.0,0.38), c = vec3(0.55,0.0,0.6), d = vec3(0.88,0.18,0.18), e = vec3(1.0,0.55,0.0), f = vec3(1.0,0.88,0.25), g = vec3(1.0,1.0,0.94);
+  if (t < .15) return mix(a, b, t / .15); if (t < .35) return mix(b, c, (t - .15) / .2); if (t < .55) return mix(c, d, (t - .35) / .2);
+  if (t < .72) return mix(d, e, (t - .55) / .17); if (t < .88) return mix(e, f, (t - .72) / .16); return mix(f, g, (t - .88) / .12); }
+void main(){ float T = uT; if (uMode > 0.5) { float dd = distance(vW, uC); T = uT + (uTc - uT) * exp(-dd * dd / (uR * uR)); }
+  float sh = 0.84 + 0.16 * max(dot(normalize(vN), normalize(vec3(0.3, 1.0, 0.45))), 0.0);
+  gl_FragColor = vec4(iron((T - uMin) / (uMax - uMin)) * sh, 1.0); }`;
+
+/* ======================================================= particles: smoke, steam, sparks */
+class Puffs {
+  constructor(scene, n, map, additive) {
+    this.list = [];
+    for (let i = 0; i < n; i++) {
+      const m = new THREE.SpriteMaterial({ map, transparent: true, depthWrite: false, opacity: 0, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending, color: 0xffffff });
+      const s = new THREE.Sprite(m); s.visible = false; s.renderOrder = 10; scene.add(s); this.list.push({ s, life: 0, max: 1, v: V3(0, 0, 0), g: 0, s0: 1, s1: 1, o: 1 });
+    }
+    this.i = 0;
+  }
+  emit(pos, vel, life, s0, s1, opacity, color, g = 0) {
+    const p = this.list[this.i++ % this.list.length];
+    p.s.position.copy(pos); p.v.copy(vel); p.life = 0; p.max = life; p.s0 = s0; p.s1 = s1; p.o = opacity; p.g = g; p.s.material.color.set(color); p.s.visible = true; p.s.material.rotation = rnd(0, 6.28);
+  }
+  update(dt, hide) {
+    for (const p of this.list) {
+      if (!p.s.visible) continue;
+      p.life += dt; if (p.life >= p.max || hide) { p.s.visible = false; continue; }
+      const f = p.life / p.max; p.v.y += p.g * dt; p.s.position.addScaledVector(p.v, dt);
+      const sc = p.s0 + (p.s1 - p.s0) * f; p.s.scale.set(sc, sc, sc); p.s.material.opacity = p.o * Math.sin(Math.PI * Math.min(1, f * 1.15));
+    }
+  }
+}
+
+/* ======================================================= 3D scene scaffold */
+function makeScene(name, cam, target, opts = {}) {
+  const S = { name, scene: new THREE.Scene(), camera: new THREE.PerspectiveCamera(opts.fov || 32, 1, 0.1, 400), ir: false, range: { min: { value: 15 }, max: { value: 120 } } };
+  S.stage = $("#s-" + name + " .stage"); S.ov = $("#s-" + name + " .ov");
+  S.camera.position.copy(cam); S.target = target.clone(); S.camBase = cam.clone();
+  if (renderer) {
+    S.controls = new OrbitControls(S.camera, renderer.domElement);
+    S.controls.target.copy(target); S.controls.enableDamping = true; S.controls.enablePan = false;
+    S.controls.minPolarAngle = 0.35; S.controls.maxPolarAngle = 1.32; S.controls.minAzimuthAngle = -0.9; S.controls.maxAzimuthAngle = 0.9;
+    S.controls.minDistance = cam.distanceTo(target) * 0.45; S.controls.maxDistance = cam.distanceTo(target) * 1.8; S.controls.enabled = false;
+  }
+  const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(10, 22, 12); key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048); const sc = key.shadow.camera; sc.left = -24; sc.right = 24; sc.top = 24; sc.bottom = -24; sc.near = 1; sc.far = 80;
+  key.shadow.bias = -0.0003; key.shadow.normalBias = 0.02; key.shadow.radius = 5; S.scene.add(key);
+  const table = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), MAT3.table); table.rotation.x = -Math.PI / 2; table.receiveShadow = true; S.scene.add(table);
+  S.add = (mesh, therm) => { mesh.castShadow = mesh.receiveShadow = true; S.scene.add(mesh); if (therm) mesh.userData.th = therm; return mesh; };
+  table.userData.th = () => ({ T: 22 });
+  S.fallback = () => ({ T: 25 });
+  S.setIR = on => {
+    S.ir = on;
+    S.scene.traverse(o => {
+      if (!o.isMesh) return; const u = o.userData;
+      if (on) {
+        if (!(o.material instanceof THREE.ShaderMaterial)) u.orig = o.material;
+        if (!u.irm) u.irm = new THREE.ShaderMaterial({ vertexShader: IR_VS, fragmentShader: IR_FS, uniforms: { uMin: S.range.min, uMax: S.range.max, uT: { value: 20 }, uTc: { value: 20 }, uR: { value: 1 }, uMode: { value: 0 }, uC: { value: V3(0, 0, 0) } } });
+        o.material = u.irm;
+      } else if (u.orig) o.material = u.orig;
+    });
+    S.scene.background = on ? new THREE.Color(0x040208) : S.bg; S.scene.environment = S.env;
+    $$('[data-ir="' + name + '"]').forEach(b => b.setAttribute("aria-pressed", on ? "true" : "false"));
+    S.drawIRUI();
+  };
+  S.updateTherm = () => {
+    if (!S.ir) return;
+    S.scene.traverse(o => { if (!o.isMesh || !o.userData.irm) return; const u = o.userData.irm.uniforms, t = (o.userData.th || S.fallback)(o); u.uT.value = t.T; u.uMode.value = t.Tc == null ? 0 : 1; if (t.Tc != null) { u.uTc.value = t.Tc; u.uR.value = t.R; u.uC.value.copy(t.C); } });
+  };
+  S.irUI = document.createElement("div"); S.irUI.innerHTML = '<div class="irui"><span class="hi"></span><div class="bar"></div><span class="lo"></span></div><div class="irhead">THERMAL · true surface temperature</div><div class="cross"><span></span></div>'; S.irUI.hidden = true; S.ov.appendChild(S.irUI);
+  S.drawIRUI = () => { S.irUI.hidden = !S.ir; $(".hi", S.irUI).textContent = Math.round(S.range.max.value) + "°"; $(".lo", S.irUI).textContent = Math.round(S.range.min.value) + "°"; };
+  S.track = (el, v) => { const p = v.clone().project(S.camera), r = S.stage.getBoundingClientRect(); el.style.left = ((p.x + 1) / 2 * r.width) + "px"; el.style.top = ((1 - p.y) / 2 * r.height) + "px"; el.hidden = p.z > 1; };
+  S.update = () => {}; S.overlay = () => {};
+  S.frame = opts.frame || (() => {});
+  return S;
+}
+function attach(S) {
+  if (!renderer) return;
+  const gl = $(".gl", S.stage); if (renderer.domElement.parentElement !== gl) gl.appendChild(renderer.domElement);
+  for (const k in scenes3d) if (scenes3d[k].controls) scenes3d[k].controls.enabled = scenes3d[k] === S;
+  resize3d(S);
+}
+function resize3d(S) {
+  if (!renderer || !S) return;
+  const r = S.stage.getBoundingClientRect(); if (r.width < 10 || r.height < 10) return;
+  renderer.setSize(r.width, r.height, false); S.camera.aspect = r.width / r.height;
+  // keep the whole bench in frame on tall or narrow screens; leave room for the lesson card on wide ones
+  if (S.onResize) S.onResize(r.width, r.height);
+  const wide = r.width >= 860, k = Math.max(1, (S.fitAspect || 1.5) / S.camera.aspect);
+  const dir = S.camBase.clone().sub(S.target), d0 = dir.length(); S.camera.position.copy(S.target).addScaledVector(dir, k);
+  S.controls.minDistance = d0 * k * 0.45; S.controls.maxDistance = d0 * k * 1.8;
+  S.camera.setViewOffset(r.width, r.height, wide ? -Math.min(200, r.width * 0.14) : 0, 0, r.width, r.height);
+  S.camera.updateProjectionMatrix(); S.controls.update();
+}
+
+/* skin: colour variation, pores, knuckle creases at the real joint positions, fingerprint ridges on the pad */
+function skinTextures(vD, vP, vT) {
+  TX.skinC = canvasTex(512, 1024, (g, w, h) => {
+    g.fillStyle = "#dfa58a"; g.fillRect(0, 0, w, h);
+    const blot = (v, a, c) => { const gr = g.createLinearGradient(0, v * h - 70, 0, v * h + 70); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(.5, c.replace("A", a)); gr.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = gr; g.fillRect(0, v * h - 70, w, 140); };
+    blot(vT * 0.4, .55, "rgba(214,120,104,A)"); blot(vD, .35, "rgba(204,118,100,A)"); blot(vP, .4, "rgba(204,118,100,A)");
+    for (let i = 0; i < 9000; i++) { g.fillStyle = `rgba(${150 + Math.random() * 60 | 0},${90 + Math.random() * 40 | 0},${80 + Math.random() * 30 | 0},${Math.random() * .08})`; g.fillRect(Math.random() * w, Math.random() * h, 2 + Math.random() * 6, 2 + Math.random() * 6); }
+  }, true);
+  TX.skinB = canvasTex(512, 1024, (g, w, h) => {
+    g.fillStyle = "#808080"; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 26000; i++) { g.fillStyle = Math.random() < .5 ? "rgba(60,60,60,.35)" : "rgba(170,170,170,.25)"; g.fillRect(Math.random() * w, Math.random() * h, 1.5, 1.5); }
+    const crease = (v, u0, u1, n) => { for (let k = 0; k < n; k++) { g.strokeStyle = "rgba(40,40,40,.55)"; g.lineWidth = 1.6; g.beginPath(); const y = v * h + (k - n / 2) * 7; for (let x = u0 * w; x <= u1 * w; x += 6) g.lineTo(x, y + Math.sin(x * 0.09 + k) * 2.5); g.stroke(); } };
+    for (const v of [vD, vP]) { crease(v, 0, 0.16, 5); crease(v, 0.84, 1, 5); crease(v + 0.012, 0.36, 0.64, 2); }
+    g.strokeStyle = "rgba(55,55,55,.4)"; g.lineWidth = 1.2;
+    for (let r = 6; r < 120; r += 5) { g.beginPath(); g.ellipse(w * 0.5, h * vT, r * 1.3, r * 0.55, 0, 0, Math.PI * 2); g.stroke(); }
+  });
+  MAT3.skin.map = TX.skinC; MAT3.skin.bumpMap = TX.skinB; MAT3.skin.needsUpdate = true;
+}
+/* a fingertip: lathe-turned finger with flattened cross-section, knuckle creases, nail */
+function makeFinger() {
+  const pts = [], R0 = 0.78, L = 26;
+  for (let k = 0; k <= 14; k++) { const th = k / 14 * Math.PI / 2; pts.push(new THREE.Vector2(R0 * Math.sin(th) + 1e-4, R0 * (1 - Math.cos(th)))); }
+  const sm = (y, a, b) => { const t = clamp((y - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }, bump = (y, c, w, a) => a * Math.exp(-(((y - c) / w) ** 2));
+  for (let y = R0 + 0.15; y <= L; y += 0.16) pts.push(new THREE.Vector2(0.8 + 0.05 * sm(y, 0.8, 2.2) + bump(y, 2.6, 0.35, 0.05) + 0.07 * sm(y, 2.8, 4.8) + bump(y, 5.4, 0.45, 0.07) + 0.08 * sm(y, 5.8, 9) + 0.55 * sm(y, 10, 16), y));
+  pts.push(new THREE.Vector2(0.001, L + 0.05));
+  const vAt = y => pts.findIndex(p => p.y >= y) / (pts.length - 1);
+  skinTextures(vAt(2.6), vAt(5.4), vAt(0.5));
+  const g = new THREE.LatheGeometry(pts, 80); g.scale(1, 1, 0.86); g.computeVertexNormals();
+  const grp = new THREE.Group(), skin = new THREE.Mesh(g, MAT3.skin); skin.castShadow = skin.receiveShadow = true; grp.add(skin);
+  const nail = new THREE.Mesh(new THREE.CylinderGeometry(0.835, 0.81, 1.25, 28, 1, true, -0.88, 1.76), MAT3.nail); nail.position.y = 1.0; nail.scale.z = 0.89; grp.add(nail);
+  const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.81, 0.79, 0.16, 28, 1, true, -0.85, 1.7), MAT3.nailTip); tip.position.y = 0.32; tip.scale.z = 0.89; grp.add(tip);
+  grp.userData.skin = skin; return grp;
+}
+function orientFinger(f, contact, dir, ref) {
+  const Y = dir.clone().normalize(), Z = ref.clone().sub(Y.clone().multiplyScalar(ref.dot(Y))).normalize(), X = new THREE.Vector3().crossVectors(Y, Z);
+  f.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z));
+  // the point of the fingertip that sits lowest touches the surface
+  if (!f.userData.low) {
+    const pos = f.userData.skin.geometry.attributes.position, v = new THREE.Vector3(); let best = null;
+    for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i); if (v.y > 3) continue; const w = v.clone().applyQuaternion(f.quaternion); if (!best || w.y < best.y) best = w; }
+    f.userData.low = best;
+  }
+  f.position.copy(contact).sub(f.userData.low);
+}
+
+/* ======================================================= 1 COOL THE CHIP: a power-module stack */
+function buildChip() {
+  const S = makeScene("chip", V3(9.5, 9, 13), V3(0, 1.7, 0), { fov: 30 }); S.fitAspect = 1.25;
+  const st = { mat: "aln", X: 2 }; S.st = st;
+  const die = V3(-1.05, 0, 0);
+  const plate = S.add(new THREE.Mesh(new RoundedBoxGeometry(9, 1.4, 6.6, 4, 0.14), MAT3.al), () => ({ T: 30, Tc: 30 + 0.05 * (chipT(MATS[st.mat], st.X) - 30), C: die, R: 3.5 })); plate.position.y = 0.7; plate.userData.mesh = plate;
+  for (const [x, z] of [[-4, -2.8], [4, -2.8], [-4, 2.8], [4, 2.8]]) { const sc = S.add(new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.22, 24), MAT3.screw), () => ({ T: 30 })); sc.position.set(x, 1.5, z); sc.userData.mesh = sc; const hx = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.05, 6), new THREE.MeshStandardMaterial({ color: 0x050505, roughness: .8 })); hx.position.set(x, 1.6, z); S.scene.add(hx); }
+  for (const x of [-2.4, 2.4]) {
+    const barb = S.add(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.34, 1.3, 28), MAT3.brass), () => ({ T: 29 })); barb.rotation.x = Math.PI / 2; barb.position.set(x, 0.75, -3.9); barb.userData.mesh = barb;
+    const curve = new THREE.CatmullRomCurve3([V3(x, 0.75, -4.3), V3(x, 0.75, -6.2), V3(x * 1.5, 0.48, -9.5), V3(x * 2.4, 0.48, -16)]);
+    const tube = S.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 0.46, 28), MAT3.tube), () => ({ T: 27 })); tube.userData.mesh = tube;
+  }
+  const sub = S.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), MAT3.aln), () => ({ T: 30 + 0.04 * (chipT(MATS[st.mat], st.X) - 30), Tc: chipT(MATS[st.mat], st.X), C: S.dieWorld, R: 0.8 + 0.25 * st.X })); sub.userData.mesh = sub;
+  const padMat = MAT3.cu, pads = [];
+  for (const [x, w] of [[-1.05, 2.3], [1.35, 1.6]]) { const p = S.add(new THREE.Mesh(new RoundedBoxGeometry(w, 0.035, 2.9, 2, 0.012), padMat), () => ({ T: 30, Tc: chipT(MATS[st.mat], st.X), C: S.dieWorld, R: 0.8 + 0.25 * st.X })); p.position.x = x; p.userData.mesh = p; pads.push(p); }
+  const solder = S.add(new THREE.Mesh(new THREE.BoxGeometry(1.08, 0.02, 1.08), MAT3.solder), () => ({ T: chipT(MATS[st.mat], st.X) })); solder.position.x = die.x; solder.userData.mesh = solder;
+  const dieM = S.add(new THREE.Mesh(new THREE.BoxGeometry(1, 0.05, 1), MAT3.die), () => ({ T: chipT(MATS[st.mat], st.X) })); dieM.position.x = die.x; dieM.userData.mesh = dieM;
+  const wires = new THREE.Group(); S.scene.add(wires);
+  const terms = [];
+  for (const [x, flip] of [[-2.05, -1], [2.05, 1]]) {
+    const g = new THREE.Group();
+    const up = new THREE.Mesh(new THREE.BoxGeometry(0.07, 2.1, 0.9), MAT3.tinned), tab = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.07, 0.9), MAT3.tinned), foot = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.06, 0.9), MAT3.tinned);
+    up.position.set(0, 1.05, 0); tab.position.set(flip * 0.47, 2.1, 0); foot.position.set(-flip * 0.2, 0.03, 0);
+    for (const m of [up, tab, foot]) { m.castShadow = m.receiveShadow = true; g.add(m); }
+    const hole = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.08, 20), new THREE.MeshStandardMaterial({ color: 0x0b0b0b })); hole.position.set(flip * 0.55, 2.1, 0); g.add(hole);
+    g.position.x = x; S.scene.add(g); terms.push(g);
+  }
+  const smoke = new Puffs(S.scene, 46, TX.smoke, false), sparks = new Puffs(S.scene, 80, TX.spark, true);
+  const flash = new THREE.PointLight(0x9fc7ff, 0, 6, 2); S.scene.add(flash);
+  S.dieWorld = V3(die.x, 2, 0);
+  function layout() {
+    const m = MATS[st.mat], t = 0.1 + st.X * 0.08;
+    sub.geometry.dispose(); sub.geometry = new RoundedBoxGeometry(5, t, 3.7, 3, Math.min(0.04, t / 3)); sub.position.y = 1.4 + t / 2;
+    sub.userData.orig = MAT3[st.mat]; if (!S.ir) sub.material = MAT3[st.mat];
+    const top = 1.4 + t; pads.forEach(p => { p.position.y = top + 0.0175; }); solder.position.y = top + 0.045; dieM.position.y = top + 0.08; S.dieWorld.set(die.x, top + 0.1, 0);
+    terms[0].position.y = top + 0.035; terms[1].position.y = top + 0.035;
+    while (wires.children.length) { const w = wires.children.pop(); w.geometry.dispose(); }
+    S.fallback = () => ({ T: 30, Tc: chipT(MATS[st.mat], st.X), C: S.dieWorld, R: 1.6 });
+    const yd = top + 0.106, yp = top + 0.036;
+    for (let i = 0; i < 7; i++) {
+      const z = -0.36 + i * 0.12, z2 = z * 1.9;
+      const c = new THREE.CatmullRomCurve3([V3(-0.75, yd, z), V3(-0.45, yd + 0.42, z * 1.05), V3(0.35, yd + 0.48, (z + z2) / 2), V3(1.05, yd + 0.22, z2), V3(1.3, yp, z2)]);
+      const w = new THREE.Mesh(new THREE.TubeGeometry(c, 40, 0.022, 10), MAT3.wire); w.castShadow = true; wires.add(w);
+    }
+    if (S.ir) S.setIR(true);
+  }
+  S.set = p => {
+    Object.assign(st, p); layout();
+    $("#chipX").value = st.X; $("#chipXo").textContent = st.X.toFixed(1) + " mm";
+    $$("#chipTiles .tile").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === st.mat ? "true" : "false"));
+    const Tc = chipT(MATS[st.mat], st.X); S.range.min.value = 20; S.range.max.value = clamp(Math.max(80, Tc * 1.05), 80, 700); S.drawIRUI();
+    if (lessons.chip) lessons.chip.check();
+  };
+  S.ov.insertAdjacentHTML("beforeend", '<div class="big"><div class="n"></div><div class="s">10 W silicon chip · cooled plate at 30 °C</div><span class="badge"></span></div>' +
+    '<div class="tag" data-k="sub"></div><div class="tag" data-k="die">silicon chip</div><div class="tag" data-k="plate">water-cooled plate · 30 °C</div>');
+  let acc = 0;
+  S.update = dt => {
+    const m = MATS[st.mat], Tc = chipT(m, st.X), hot = !m.elec && Tc > 150;
+    acc += dt;
+    if (!S.ir && m.elec && acc > 0.02) {
+      acc = 0;
+      for (let k = 0; k < 3; k++) { const z = rnd(-0.5, 0.5); sparks.emit(V3(rnd(0.2, 1.3), S.dieWorld.y + rnd(0, 0.3), z), V3(rnd(-3, 3), rnd(1.5, 5), rnd(-3, 3)), rnd(0.15, 0.45), 0.18, 0.05, 1, 0xffe6a0, -14); }
+      if (Math.random() < 0.15) smoke.emit(S.dieWorld.clone().add(V3(1, 0.2, 0)), V3(rnd(-.2, .2), 1.2, rnd(-.2, .2)), 2.4, 0.6, 2.4, 0.5, 0x9a9da3);
+      flash.position.set(0.5, S.dieWorld.y + 0.4, 0); flash.intensity = Math.random() < 0.5 ? rnd(4, 14) : 0;
+    } else if (!m.elec) flash.intensity = 0;
+    if (!S.ir && hot && Math.random() < dt * (Tc > 400 ? 26 : 12)) smoke.emit(S.dieWorld.clone().add(V3(rnd(-.4, .4), 0.1, rnd(-.4, .4))), V3(rnd(-.15, .15), rnd(0.8, 1.4), rnd(-.15, .15)), rnd(2.5, 3.6), 0.4, rnd(2.2, 3.4), Tc > 400 ? 0.7 : 0.45, Tc > 400 ? 0x5d5f63 : 0xa7aaae);
+    smoke.update(dt, S.ir); sparks.update(dt, S.ir); if (S.ir) flash.intensity = 0;
+  };
+  S.overlay = () => {
+    const m = MATS[st.mat], Tc = chipT(m, st.X), big = $(".big", S.ov);
+    $(".n", big).textContent = m.elec ? "Short circuit" : Tc > 999 ? "> 1000 °C" : Math.round(Tc) + " °C";
+    $(".n", big).style.color = m.elec ? "#ffd56a" : Tc <= 150 ? "#8ef0a8" : "#ff8b8b";
+    const b = $(".badge", big); b.className = "badge " + (m.elec ? "warn" : Tc <= 150 ? "ok" : "bad");
+    b.textContent = m.elec ? "⚡ A metal substrate carries the current: the chip shorts out" : Tc <= 150 ? "✓ The chip is safe" : "🔥 The chip overheats";
+    const t = 0.1 + st.X * 0.08;
+    const sub = $('[data-k="sub"]', S.ov); sub.innerHTML = "<b>" + (m.long || m.name) + " substrate</b>λ " + num(m.lam, 3) + " W/m·K · " + st.X.toFixed(1) + " mm"; S.track(sub, V3(1.6, 1.4 + t / 2, 2.6));
+    S.track($('[data-k="die"]', S.ov), V3(-1.05, 1.4 + t + 0.95, 0.2));
+    S.track($('[data-k="plate"]', S.ov), V3(2.8, 0.55, 3.6));
+    const cr = $(".cross", S.irUI); S.track(cr, S.dieWorld); $("span", cr).textContent = "Sp1 " + Math.round(Tc) + " °C";
+  };
+  const host = $("#chipTiles"), LIST = ["cu", "al", "aln", "alumina", "glass", "plastic"];
+  host.innerHTML = LIST.map(k => '<button class="tile" data-m="' + k + '"><i style="background:' + MATS[k].col + '"></i><span>' + MATS[k].name + '<small>λ ' + num(MATS[k].lam, 3) + '</small></span></button>').join("");
+  host.addEventListener("click", e => { const b = e.target.closest(".tile"); if (b) S.set({ mat: b.dataset.m }); });
+  $("#chipX").addEventListener("input", e => S.set({ X: +e.target.value }));
+  S.set({});
+  return S;
+}
+
+/* ======================================================= 2 TOUCH TEST: one block, one fingertip */
+function buildTouch() {
+  const S = makeScene("touch", V3(0, 24.6, 46.4), V3(0, 4.2, 0), { fov: 15 }); S.fitAspect = 1.25;
+  const LIST = ["cu", "al", "steel", "stone", "glass", "plastic", "wood", "foam"];
+  const st = { mat: "steel", T: 0, press: 1 }; S.st = st;
+  const block = S.add(new THREE.Mesh(new RoundedBoxGeometry(9, 4.5, 9, 5, 0.18), MAT3.steel), () => ({ T: st.T })); block.position.y = 2.25; block.userData.mesh = block;
+  const finger = makeFinger(); S.scene.add(finger);
+  const contact = V3(0.3, 4.5, 0.6), dir = V3(0.16, 0.8, 0.58), nailRef = V3(0, 0.42, 1);
+  finger.userData.skin.userData.th = () => ({ T: 33, Tc: contactT(MATS[st.mat], st.T), C: contact, R: 1.1 }); S.fallback = () => ({ T: 33 });
+  let lift = 0, target = 0;
+  S.set = p => {
+    const changed = p.mat && p.mat !== st.mat; Object.assign(st, p);
+    block.userData.orig = MAT3[st.mat]; if (!S.ir) block.material = MAT3[st.mat];
+    if (changed) { lift = 2.2; }
+    $("#touchT").value = st.T; $("#touchTo").textContent = deg(st.T);
+    $$("#s-touch .pill[data-t]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.t === st.T ? "true" : "false"));
+    $$("#touchTiles .tile").forEach(b => { b.setAttribute("aria-pressed", b.dataset.m === st.mat ? "true" : "false"); $("small", b).textContent = "feels " + deg(contactT(MATS[b.dataset.m], st.T)); });
+    S.range.min.value = Math.min(st.T, 10) - 5; S.range.max.value = Math.max(st.T, 40) + 5; S.drawIRUI();
+    if (lessons.touch) lessons.touch.check();
+  };
+  S.update = dt => { lift += (target - lift) * Math.min(1, dt * 6); orientFinger(finger, contact.clone().add(V3(0, lift, 0)), dir, nailRef); };
+  const feel = T => T < 12 ? ["Freezing!", "#9cc7ff"] : T < 26 ? ["Cold", "#b9d8ff"] : T < 38 ? ["Neutral", "#ffffff"] : T < 44 ? ["Warm", "#ffd27a"] : ["Burns!", "#ff8b8b"];
+  S.ov.insertAdjacentHTML("beforeend", '<div class="big"><div class="s">Your fingertip feels</div><div class="n"></div><span class="badge"></span></div><div class="tag" data-k="blk"></div>');
+  S.overlay = () => {
+    const m = MATS[st.mat], Tf = contactT(m, st.T), [w, c] = feel(Tf), big = $(".big", S.ov);
+    $(".n", big).textContent = deg(Tf); $(".n", big).style.color = c;
+    const b = $(".badge", big); b.className = "badge " + (Tf < 26 || Tf >= 44 ? "bad" : "ok"); b.textContent = w + "  ·  the " + (m.long || m.name).toLowerCase() + " is at " + deg(st.T);
+    const tg = $('[data-k="blk"]', S.ov); tg.innerHTML = "<b>" + (m.long || m.name) + "</b>at " + deg(st.T); S.track(tg, V3(-3.2, 2.2, 4.6));
+    const cr = $(".cross", S.irUI); S.track(cr, contact); $("span", cr).textContent = "Sp1 " + Math.round(Tf) + " °C";
+  };
+  const host = $("#touchTiles");
+  host.innerHTML = LIST.map(k => '<button class="tile" data-m="' + k + '"><i style="background:' + MATS[k].col + '"></i><span>' + (MATS[k].long && k !== "steel" ? MATS[k].long : MATS[k].name) + '<small></small></span></button>').join("");
+  host.addEventListener("click", e => { const b = e.target.closest(".tile"); if (b) S.set({ mat: b.dataset.m }); });
+  $("#touchT").addEventListener("input", e => S.set({ T: +e.target.value }));
+  $$("#s-touch .pill[data-t]").forEach(b => b.addEventListener("click", () => S.set({ T: +b.dataset.t })));
+  S.set({});
+  return S;
+}
+
+/* ======================================================= 3 HOT-CUP RACE: four tumblers */
+function buildCup() {
+  const S = makeScene("cup", V3(0, 19, 37), V3(0, 4.4, 0), { fov: 30 }); S.fitAspect = 2.3;
+  const LIST = ["cu", "steel", "glass", "plastic"], X = [-10.8, -3.6, 3.6, 10.8], R = 3.1, H = 10;
+  const st = { w: 3, t: 0, phase: "empty" }; S.st = st;
+  const results = () => LIST.map(k => ({ k, t: cupOuchTime(MATS[k], st.w) })); S.results = results;
+  const cups = LIST.map((k, i) => {
+    const g = { k, x: X[i], z: 0 };
+    g.body = S.add(new THREE.Mesh(new THREE.BufferGeometry(), MAT3[k]), () => ({ T: g.Tout || 20 })); g.body.userData.mesh = g.body; g.body.position.x = X[i];
+    g.tea = S.add(new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 64), MAT3.tea), () => ({ T: 96 })); g.tea.userData.mesh = g.tea; g.tea.position.x = X[i]; g.tea.visible = false;
+    g.stream = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 1, 16), MAT3.tea); g.stream.visible = false; g.stream.position.x = X[i]; S.scene.add(g.stream);
+    g.steam = new Puffs(S.scene, 26, TX.smoke, false); g.stream.userData.th = () => ({ T: 98 });
+    return g;
+  });
+  function lathe(w) {
+    const wb = (w + 0.25), p = [[0, 0], [R - 0.45, 0], [R - 0.12, 0.06], [R - 0.01, 0.4], [R, H - 0.12], [R - 0.05, H], [R - w + 0.05, H], [R - w, H - 0.12], [R - w, wb + 0.3], [R - w - 0.3, wb], [0.001, wb]];
+    const g = new THREE.LatheGeometry(p.map(([r, y]) => new THREE.Vector2(r, y)), 120); g.computeVertexNormals(); return { g, wb };
+  }
+  // a row of four on wide screens, a 2 x 2 grid on phones
+  S.onResize = w => {
+    const grid = w < 600;
+    cups.forEach((c, i) => { c.x = grid ? (i % 2 ? 3.9 : -3.9) : X[i]; c.z = grid ? (i < 2 ? -4.2 : 4.2) : 0; for (const o of [c.body, c.tea, c.stream]) { o.position.x = c.x; o.position.z = c.z; } });
+    S.fitAspect = grid ? 0.95 : 2.3; S.camBase.copy(grid ? V3(0, 40, 27) : V3(0, 19, 37));
+  };
+  function rebuild() {
+    const w = st.w / 10, { g, wb } = lathe(w * (1)); // wall thickness drawn at true scale (cm)
+    cups.forEach(c => { c.body.geometry.dispose(); c.body.geometry = g; c.wb = wb; c.rin = R - w; c.tea.scale.set(c.rin - 0.02, 1, c.rin - 0.02); });
+  }
+  let t0 = 0, lt0 = -2, lt1 = 2, fill = 0;
+  S.pour = () => { const r = results(); lt1 = Math.log10(Math.min(900, Math.max(...r.map(x => x.t)) * 1.5)); st.phase = "filling"; fill = 0; st.t = 0; $("#cupGo").textContent = "☕ Pour again"; };
+  S.set = p => {
+    Object.assign(st, p); rebuild();
+    $("#cupW").value = st.w; $("#cupWo").textContent = num(st.w, 2) + " mm";
+    if (st.phase === "empty") { $("#cupGo").textContent = "☕ Pour boiling tea"; cups.forEach(c => { c.tea.visible = false; c.Tout = 20; }); }
+    S.range.min.value = 18; S.range.max.value = 100; S.drawIRUI();
+    if (lessons.cup) lessons.cup.check();
+  };
+  S.update = (dt, now) => {
+    if (st.phase === "filling") {
+      fill = Math.min(1, fill + dt / 0.6);
+      cups.forEach(c => { const lvl = (H - c.wb - 1.3) * fill; c.tea.visible = lvl > 0.02; c.tea.scale.y = Math.max(lvl, 0.01); c.tea.position.y = c.wb + lvl / 2;
+        c.stream.visible = fill < 1; const top = 22, bot = c.wb + lvl; c.stream.scale.y = top - bot; c.stream.position.y = (top + bot) / 2; });
+      if (fill >= 1) { st.phase = "running"; t0 = now; }
+    } else if (st.phase === "running") {
+      const f = Math.min(1, (now - t0) / 8000); st.t = Math.pow(10, lt0 + f * (lt1 - lt0));
+      if (f >= 1) { st.phase = "done"; if (lessons.cup) lessons.cup.check(); }
+    }
+    const full = st.phase !== "empty";
+    cups.forEach(c => {
+      const m = MATS[c.k], Fo = st.phase === "running" || st.phase === "done" ? st.t * m.a / ((st.w / 1000) ** 2) : 0;
+      c.Tout = CUP.T0 + (CUP.Thot - CUP.T0) * slabTheta(1, Fo);
+      if (full && !S.ir && Math.random() < dt * 9) c.steam.emit(V3(c.x + rnd(-1.6, 1.6), H - 0.8, c.z + rnd(-1.6, 1.6)), V3(rnd(-.25, .25), rnd(1.6, 2.6), rnd(-.25, .25)), rnd(2.2, 3.4), 0.8, rnd(3, 4.6), 0.38, 0xf4f6f8);
+      c.steam.update(dt, S.ir);
+    });
+  };
+  S.ov.insertAdjacentHTML("beforeend", '<div class="big"><div class="n"></div><div class="s"></div></div>' + LIST.map(k => '<div class="tag" data-k="' + k + '"></div>').join(""));
+  S.overlay = () => {
+    const big = $(".big", S.ov), r = results(), going = st.phase === "running" || st.phase === "done", best = r.reduce((a, b) => b.t > a.t ? b : a);
+    $(".n", big).textContent = going ? "⏱ " + fmtTime(st.t) : st.phase === "filling" ? "Pouring…" : "4 cups at 20 °C"; $(".n", big).style.color = "#fff";
+    $(".s", big).textContent = going ? (st.phase === "running" ? "time-lapse: the clock speeds up" : "Too hot to hold once the outside passes 60 °C") : "Each cup is held with bare fingers on the outside";
+    cups.forEach((c, i) => {
+      const tg = $('[data-k="' + c.k + '"]', S.ov), m = MATS[c.k], ouch = going && st.t >= r[i].t, win = st.phase === "done" && c.k === best.k;
+      tg.className = "tag" + (win ? " win" : ouch ? " hot" : "");
+      const nar = S.stage.clientWidth < 600;
+      tg.innerHTML = "<b>" + (nar ? m.name : (m.long && c.k !== "steel" ? m.long : m.name)) + "</b>" + (ouch ? "🔥 " + (nar ? "" : "too hot after ") + fmtTime(r[i].t) + (win ? " 🏆" : "") : going ? "🖐 " + Math.round(c.Tout) + " °C" : st.w + " mm");
+      S.track(tg, c.z < 0 ? V3(c.x, H + 2.2, c.z) : V3(c.x, -0.2, c.z + 4.2));
+    });
+    $(".cross", S.irUI).hidden = true;
+  };
+  $("#cupGo").addEventListener("click", () => S.pour());
+  $("#cupW").addEventListener("input", e => S.set({ w: +e.target.value, t: 0, phase: "empty" }));
+  S.set({});
+  return S;
+}
+
+/* ======================================================= 4 PICK THE WALL: an Ashby chart */
+const chart = (() => {
+  const LIST = ["cu", "al", "aln", "alumina", "steel", "ti", "stone", "concrete", "glass", "adobe", "brick", "aerated", "firebrick", "neoprene", "cork", "foam"];
+  // property ranges (factor on each side of the representative value) – typical spreads, as bubbles on a real chart
+  const SPAN = { cu: [1.06, 1.08], al: [1.12, 1.12], aln: [1.18, 1.2], alumina: [1.2, 1.22], steel: [1.12, 1.12], ti: [1.35, 1.35], stone: [1.5, 1.5], concrete: [1.55, 1.5], glass: [1.25, 1.25], adobe: [1.4, 1.4], brick: [1.45, 1.45], aerated: [1.6, 1.6], firebrick: [1.5, 1.5], neoprene: [1.35, 1.3], cork: [1.4, 1.4], foam: [1.7, 1.6] };
+  const FAM = [["Metals", "#c7372f", ["cu", "al", "steel", "ti"]], ["Technical ceramics", "#d8a21a", ["aln", "alumina"]], ["Glasses", "#2aa6b8", ["glass"]], ["Non-technical ceramics", "#8a6d4e", ["stone", "concrete", "brick", "adobe", "firebrick", "aerated"]], ["Elastomers", "#4f8a3a", ["neoprene"]], ["Natural materials", "#9a6b2f", ["cork"]], ["Foams", "#7b5ea7", ["foam"]]];
+  const famOf = {}; FAM.forEach(([n, c, ks]) => ks.forEach(k => { famOf[k] = { n, c }; }));
+  const GOALS = {
+    months: { f: m => 1 / m.lam, ok: () => true, title: "Cold room for months: lowest λ wins", short: "Months: lowest λ" },
+    hour: { f: m => 1 / m.a, ok: m => m.a <= 0.02 * 0.02 / 7200, title: "Hold out 1 hour through 20 mm: lowest a wins", short: "1 hour: lowest a", con: "faded: the change would cross 20 mm within the hour" },
+    store: { f: m => m.lam / Math.sqrt(m.a), ok: m => m.a <= 3e-6, title: "Store the day's sun: highest λ/a½ wins", short: "Sun wall: highest λ/a½", con: "faded: heat would cross the wall too soon" },
+    kiln: { f: m => Math.sqrt(m.a) / m.lam, ok: m => m.tmax >= 1000, title: "Kiln wall at 1000 °C: highest a½/λ wins", short: "Kiln: highest a½/λ", con: "faded: melts or burns below 1000 °C" }
+  };
+  const st = { goal: "months", lM: null }, XR = [-8.3, -3.6], YR = [-2, 3], cv = $("#cvWall");
+  let geo = null, dragging = false;
+  $("#goalTiles").addEventListener("click", e => { const b = e.target.closest(".pill"); if (b) set({ goal: b.dataset.g, lM: null }); });
+  const lmAt = (px, py) => { const la = geo.la(px), ll = geo.ll(py); return st.goal === "months" ? -ll : st.goal === "hour" ? -la : st.goal === "store" ? ll - la / 2 : la / 2 - ll; };
+  cv.addEventListener("pointerdown", e => { if (!geo) return; const r = cv.getBoundingClientRect(); if (e.clientX - r.left < geo.L) return; dragging = true; cv.setPointerCapture(e.pointerId); move(e); });
+  cv.addEventListener("pointermove", e => { if (dragging) move(e); });
+  cv.addEventListener("pointerup", () => { dragging = false; });
+  function move(e) { const r = cv.getBoundingClientRect(); set({ lM: lmAt(e.clientX - r.left, e.clientY - r.top) }); }
+  const ranked = () => { const G = GOALS[st.goal]; return LIST.filter(k => G.ok(MATS[k])).sort((a, b) => G.f(MATS[b]) - G.f(MATS[a])); };
+  const defaultLM = () => { const G = GOALS[st.goal], r = ranked().map(k => Math.log10(G.f(MATS[k]))); return r.length > 3 ? (r[2] + r[3]) / 2 : r[r.length - 1] - 0.15; };
+  function set(p) { Object.assign(st, p); if (st.lM == null) st.lM = defaultLM(); $$("#goalTiles .pill").forEach(b => b.setAttribute("aria-pressed", b.dataset.g === st.goal ? "true" : "false")); draw(); if (lessons.wall) lessons.wall.check(); }
+  const winners = () => { const G = GOALS[st.goal]; return ranked().filter(k => Math.log10(G.f(MATS[k])) >= st.lM - 1e-9).slice(0, 3); };
+  function hull(pts) { pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]); const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); const lo = [], up = []; for (const p of pts) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); } for (const p of pts.slice().reverse()) { while (up.length > 1 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); } return lo.slice(0, -1).concat(up.slice(0, -1)); }
+  function draw() {
+    const dpr = Math.min(2, window.devicePixelRatio || 1), rc = cv.parentElement.getBoundingClientRect(), W = Math.max(50, rc.width | 0), H = Math.max(50, rc.height | 0);
+    if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + "px"; cv.style.height = H + "px"; }
+    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    const dark = getComputedStyle(document.documentElement).getPropertyValue("--paper").trim() === "#0e1318";
+    const ink = dark ? "#e8edf3" : "#1c232b", muted = dark ? "#a0acba" : "#5d6877", grid = dark ? "#2a333e" : "#d6dde4", paper = dark ? "#121820" : "#ffffff";
+    const G = GOALS[st.goal], narrow = W < 860, L = narrow ? 52 : 470, R = W - 22, T = narrow ? 60 : 84, Bt = H - (narrow ? 70 : 64);
+    const X = la => L + (la - XR[0]) / (XR[1] - XR[0]) * (R - L), Y = ll => Bt - (ll - YR[0]) / (YR[1] - YR[0]) * (Bt - T);
+    geo = { L, la: px => XR[0] + (px - L) / (R - L) * (XR[1] - XR[0]), ll: py => YR[0] + (Bt - py) / (Bt - T) * (YR[1] - YR[0]) };
+    ctx.fillStyle = ink; ctx.font = "900 " + (narrow ? 19 : 27) + "px Archivo, sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(narrow ? G.short : G.title, L, T - (narrow ? 30 : 44));
+    ctx.fillStyle = paper; ctx.fillRect(L, T, R - L, Bt - T);
+    ctx.save(); ctx.beginPath(); ctx.rect(L, T, R - L, Bt - T); ctx.clip();
+    // minor and major grid, as on a printed chart
+    for (let e = Math.floor(XR[0]); e <= XR[1]; e++) for (let k = 1; k < 10; k++) { const x = X(e + Math.log10(k)); ctx.strokeStyle = grid; ctx.lineWidth = k === 1 ? 1.2 : 0.5; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, Bt); ctx.stroke(); }
+    for (let e = YR[0]; e <= YR[1]; e++) for (let k = 1; k < 10; k++) { const y = Y(e + Math.log10(k)); ctx.strokeStyle = grid; ctx.lineWidth = k === 1 ? 1.2 : 0.5; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke(); }
+    // guidelines of constant volumetric heat capacity
+    ctx.setLineDash([6, 5]); ctx.strokeStyle = muted; ctx.lineWidth = 1;
+    for (const rc2 of [1e5, 1e6, 1e7]) { ctx.beginPath(); ctx.moveTo(X(XR[0]), Y(XR[0] + Math.log10(rc2))); ctx.lineTo(X(XR[1]), Y(XR[1] + Math.log10(rc2))); ctx.stroke(); }
+    ctx.setLineDash([]);
+    // family envelopes
+    const ell = k => { const m = MATS[k], [fl, fa] = SPAN[k]; return { cx: X(Math.log10(m.a)), cy: Y(Math.log10(m.lam)), rx: X(Math.log10(m.a) + Math.log10(fa)) - X(Math.log10(m.a)), ry: Y(Math.log10(m.lam)) - Y(Math.log10(m.lam) + Math.log10(fl)) }; };
+    FAM.forEach(([n, c, ks]) => { if (ks.length < 2) return; const pts = []; ks.forEach(k => { const e = ell(k); for (let a = 0; a < 6.28; a += 0.3) pts.push([e.cx + (e.rx + 8) * Math.cos(a), e.cy + (e.ry + 8) * Math.sin(a)]); }); const h = hull(pts); ctx.beginPath(); h.forEach(([x, y], j) => j ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fillStyle = c + "1f"; ctx.fill(); ctx.strokeStyle = c + "88"; ctx.lineWidth = 1.5; ctx.stroke(); });
+    // selection line and the better side
+    const lM = st.lM; ctx.fillStyle = "rgba(47,125,74,.10)"; ctx.strokeStyle = "#a51c30"; ctx.lineWidth = 3.5;
+    const poly = pts => { ctx.beginPath(); pts.forEach(([x, y], j) => j ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); };
+    let p0, p1;
+    if (st.goal === "months") { const y = Y(-lM); poly([[L, y], [R, y], [R, Bt], [L, Bt]]); p0 = [L, y]; p1 = [R, y]; }
+    else if (st.goal === "hour") { const x = X(-lM); poly([[L, T], [x, T], [x, Bt], [L, Bt]]); p0 = [x, T]; p1 = [x, Bt]; }
+    else { const f = st.goal === "store" ? la => lM + la / 2 : la => la / 2 - lM; p0 = [X(XR[0]), Y(f(XR[0]))]; p1 = [X(XR[1]), Y(f(XR[1]))]; poly(st.goal === "store" ? [p0, p1, [R, T - 4000], [L, T - 4000]] : [p0, p1, [R, Bt + 4000], [L, Bt + 4000]]); }
+    ctx.beginPath(); ctx.moveTo(...p0); ctx.lineTo(...p1); ctx.stroke();
+    // material bubbles
+    const win = winners(), medal = ["🥇", "🥈", "🥉"], tags = [];
+    LIST.forEach(k => {
+      const m = MATS[k], e = ell(k), ok = G.ok(m), wi = win.indexOf(k), c = famOf[k].c;
+      ctx.globalAlpha = ok ? 1 : 0.18;
+      ctx.beginPath(); ctx.ellipse(e.cx, e.cy, Math.max(e.rx, 5), Math.max(e.ry, 5), 0, 0, 7); ctx.fillStyle = c + (wi >= 0 ? "e6" : "99"); ctx.fill();
+      ctx.strokeStyle = wi >= 0 ? ink : c; ctx.lineWidth = wi >= 0 ? 2.5 : 1.2; ctx.stroke();
+      if (wi >= 0) tags.push({ k, m, x: e.cx, y: e.cy, rx: e.rx, wi });
+      else if (!narrow) { ctx.font = "700 14px 'Source Sans 3', sans-serif"; ctx.textBaseline = "middle"; const nm = m.long || m.name, tw = ctx.measureText(nm).width, flip = k === "brick" || e.cx + e.rx + 6 + tw > R - 4; ctx.textAlign = flip ? "right" : "left"; ctx.lineWidth = 3; ctx.strokeStyle = paper; const tx = flip ? e.cx - e.rx - 6 : e.cx + e.rx + 6; ctx.strokeText(nm, tx, e.cy); ctx.fillStyle = muted; ctx.fillText(nm, tx, e.cy); }
+      ctx.globalAlpha = 1;
+    });
+    ctx.restore();
+    const placed = [];
+    tags.sort((a, b) => a.wi - b.wi).forEach(({ m, x, y, rx, wi }) => {
+      ctx.font = "900 " + (narrow ? 15 : 19) + "px Archivo, sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      const txt = medal[wi] + " " + (narrow ? m.name : (m.long || m.name)) + (st.goal === "store" && m.cost ? "  $" + (m.costTxt || m.cost.toLocaleString("en-US")) + "/m³" : "");
+      const tw = ctx.measureText(txt).width, off = Math.max(rx, 8) + 12, hit = (lx, ly) => lx < L + 2 || lx + tw > R - 2 || placed.some(p => Math.abs(p.y - ly) < 34 && lx < p.x + p.w + 14 && p.x < lx + tw + 14) || tags.some(t => t.x !== x && Math.abs(t.y - ly) < 18 && t.x > lx - 16 && t.x < lx + tw + 16);
+      const cands = [[x + off, y], [x - off - tw, y]]; for (const d of [38, -38, 72, -72, 106, -106]) cands.push([x + off, y + d], [x - off - tw, y + d]);
+      const [lx, ly] = cands.find(([a, b]) => !hit(a, b)) || cands[0]; placed.push({ x: lx, y: ly, w: tw });
+      if (ly !== y) { ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(lx < x ? lx + tw + 6 : lx - 6, ly); ctx.stroke(); }
+      ctx.fillStyle = paper; ctx.beginPath(); ctx.roundRect(lx - 6, ly - 16, tw + 12, 32, 8); ctx.fill(); ctx.strokeStyle = grid; ctx.lineWidth = 1; ctx.stroke(); ctx.fillStyle = ink; ctx.fillText(txt, lx, ly);
+    });
+    // axes with decades, as on a printed chart
+    ctx.strokeStyle = ink; ctx.lineWidth = 1.4; ctx.strokeRect(L, T, R - L, Bt - T);
+    const sup = e => String(e).split("").map(c => ({ "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" })[c]).join("");
+    ctx.fillStyle = muted; ctx.font = "600 13px 'JetBrains Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (let e = Math.ceil(XR[0]); e <= XR[1]; e++) ctx.fillText("10" + sup(e), X(e), Bt + 6);
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    for (let e = YR[0]; e <= YR[1]; e++) ctx.fillText(e < 0 ? String(Math.pow(10, e)) : Math.pow(10, e).toLocaleString("en-US"), L - 6, Y(e));
+    ctx.fillStyle = ink; ctx.font = "700 15px 'Source Sans 3', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText("Thermal diffusivity a (m²/s)", (L + R) / 2, Bt + 26);
+    ctx.save(); ctx.translate(L - (narrow ? 36 : 44), (T + Bt) / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = "middle"; ctx.fillText("Thermal conductivity λ (W/m·K)", 0, 0); ctx.restore();
+    if (!narrow) {
+      ctx.font = "700 13px 'Source Sans 3', sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; let lx = L + 10; const ly = Bt - 16;
+      FAM.forEach(([n, c]) => { const w = ctx.measureText(n).width; ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(lx + 6, ly, 6, 4.5, 0, 0, 7); ctx.fill(); ctx.fillStyle = muted; ctx.fillText(n, lx + 16, ly); lx += w + 32; });
+      if (G.con) { ctx.fillStyle = muted; ctx.font = "700 14px 'Source Sans 3', sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "top"; ctx.fillText(G.con, R - 10, T + 10); }
+      ctx.textAlign = "right"; ctx.textBaseline = "bottom"; ctx.fillStyle = muted; ctx.fillText("drag to move the line", R - 10, Bt - 30);
+    }
+  }
+  set({});
+  return { draw, set, st, winners };
+})();
+
+/* ======================================================= shell: tabs, theme, present, ideas, render loop */
+const order = ["chip", "touch", "cup", "wall"]; let active = "chip";
 function show(name, step) {
-  if (!scenes[name]) name = "chip";
+  if (!order.includes(name)) name = "chip";
   active = name;
   $$("nav.tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === name ? "true" : "false"));
   $$(".scene").forEach(s => { s.hidden = s.id !== "s-" + name; });
   if (step && lessons[name]) lessons[name].go(step - 1);
-  requestAnimationFrame(() => scenes[name].draw(performance.now()));
+  if (name === "wall") requestAnimationFrame(() => chart.draw()); else if (scenes3d[name]) requestAnimationFrame(() => attach(scenes3d[name]));
 }
 $$("nav.tabs button").forEach(b => b.addEventListener("click", () => { history.replaceState(null, "", "#" + b.dataset.tab); show(b.dataset.tab); }));
-window.addEventListener("resize", () => scenes[active].draw(performance.now()));
-$("#themeBtn").addEventListener("click", () => {
-  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-  document.documentElement.dataset.theme = dark ? "light" : "dark"; scenes[active].draw(performance.now());
-});
+window.addEventListener("resize", () => { placeLessons(); if (active === "wall") chart.draw(); else resize3d(scenes3d[active]); });
+$("#themeBtn").addEventListener("click", () => { const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.dataset.theme = dark ? "light" : "dark"; chart.draw(); });
 function setPresent(on) {
   document.body.classList.toggle("present", on);
   try { if (on && !document.fullscreenElement && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {}); if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {}); } catch (e) {}
-  setTimeout(() => scenes[active].draw(performance.now()), 180);
+  setTimeout(() => window.dispatchEvent(new Event("resize")), 200);
 }
 $("#presentBtn").addEventListener("click", () => setPresent(!document.body.classList.contains("present")));
-document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) document.body.classList.remove("present"); setTimeout(() => scenes[active].draw(performance.now()), 120); });
+document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) document.body.classList.remove("present"); setTimeout(() => window.dispatchEvent(new Event("resize")), 150); });
 $("#ideasBtn").addEventListener("click", () => $("#ideas").showModal());
 $("#ideasClose").addEventListener("click", () => $("#ideas").close());
-document.addEventListener("keydown", e => {
-  if (e.target.closest("input")) return;
-  if (e.key === "p" || e.key === "P") setPresent(!document.body.classList.contains("present"));
-  const k = ["chip", "touch", "cup", "wall"][+e.key - 1]; if (k) { history.replaceState(null, "", "#" + k); show(k); }
-});
-(function loop(now) { const s = scenes[active]; if (s && s.animated) s.draw(now); requestAnimationFrame(loop); })(performance.now());
+document.addEventListener("keydown", e => { if (e.target.closest("input")) return; if (e.key === "p" || e.key === "P") setPresent(!document.body.classList.contains("present")); const k = order[+e.key - 1]; if (k) { history.replaceState(null, "", "#" + k); show(k); } });
+$$(".pill.ir").forEach(b => b.addEventListener("click", () => { const S = scenes3d[b.dataset.ir]; if (S) S.setIR(!S.ir); }));
 
 /* ======================================================= lesson cards: Predict → Try it → Key idea */
-const lessons = {};
 function lesson(name, steps) {
   const host = $('[data-lesson="' + name + '"]');
   let i = 0, answered = null, done = false;
@@ -334,328 +835,80 @@ function lesson(name, steps) {
   function go(k) { i = clamp(k, 0, steps.length - 1); answered = null; done = false; const st = steps[i]; if (st.setup) st.setup(); render(); }
   function render() {
     const st = steps[i], kind = st.kind;
-    let h = '<div class="top"><span class="kind ' + kind + '">' + (kind === "predict" ? "Predict" : kind === "try" ? "Try it" : "Key idea") + '</span><div class="dots">' +
-      steps.map((_, k) => '<i class="' + (k === i ? "on" : k < i ? "done" : "") + '"></i>').join("") + '</div><button class="min" data-x="min" title="Hide the lesson" aria-label="Hide the lesson">–</button></div>';
+    let h = '<div class="top"><span class="kind ' + kind + '">' + (kind === "predict" ? "Predict" : kind === "try" ? "Try it" : "Key idea") + '</span><div class="dots">' + steps.map((_, k) => '<i class="' + (k === i ? "on" : k < i ? "done" : "") + '"></i>').join("") + '</div><button class="min" data-x="min" title="Hide the lesson" aria-label="Hide the lesson">–</button></div>';
     h += '<p class="q">' + st.q + '</p>';
     if (kind === "idea") h += '<div class="eq">' + st.eq + '</div>' + (st.eqw ? '<p class="eqw">' + st.eqw + '</p>' : "") + '<p class="rev">' + st.text + '</p>';
-    if (kind === "predict") {
-      h += '<div class="opts">' + st.opts.map((o, k) => '<button data-o="' + k + '"' + (answered != null ? " disabled" : "") + ' class="' + (answered == null ? "" : k === st.ok ? "right" : k === answered ? "wrong" : "") + '">' + o + '</button>').join("") + '</div>';
-      if (answered != null) h += '<p class="rev">' + (answered === st.ok ? "✓ " : "") + st.reveal + '</p>';
-    }
+    if (kind === "predict") { h += '<div class="opts">' + st.opts.map((o, k) => '<button data-o="' + k + '"' + (answered != null ? " disabled" : "") + ' class="' + (answered == null ? "" : k === st.ok ? "right" : k === answered ? "wrong" : "") + '">' + o + '</button>').join("") + '</div>'; if (answered != null) h += '<p class="rev">' + (answered === st.ok ? "✓ " : "") + st.reveal + '</p>'; }
     if (kind === "try") h += '<p class="status' + (done ? " ok" : "") + '">' + (done ? "✓ " + st.done : "Your turn: use the controls below.") + '</p>';
     h += '<div class="nav"><button data-x="back"' + (i === 0 ? " disabled" : "") + '>← Back</button><button class="next" data-x="next"' + (i === steps.length - 1 ? " disabled" : "") + '>Next →</button></div>';
     host.innerHTML = h;
   }
-  const L = { go, check() { const st = steps[i]; if (st.kind === "try" && !done && st.goal()) { done = true; render(); } }, get i() { return i; }, get n() { return steps.length; } };
-  lessons[name] = L; render(); return L;
+  lessons[name] = { go, check() { const st = steps[i]; if (st.kind === "try" && !done && st.goal()) { done = true; render(); } }, get i() { return i; }, get n() { return steps.length; } };
+  render();
+}
+function placeLessons() { const narrow = matchMedia("(max-width: 860px)").matches; $$(".scene").forEach(sc => { const l = $(".lesson", sc), target = narrow ? sc : $(".stage", sc); if (l.parentElement !== target) target.appendChild(l); }); }
+
+/* ======================================================= boot */
+if (renderer) {
+  buildTextures(); buildMaterials();
+  scenes3d.chip = buildChip(); scenes3d.touch = buildTouch(); scenes3d.cup = buildCup();
+  new RGBELoader().load("assets/studio_small_09_1k.hdr", hdr => {
+    hdr.mapping = THREE.EquirectangularReflectionMapping;
+    // reflections and fill light: an evenly lit studio room; backdrop: the photographed studio, out of focus
+    const pm = new THREE.PMREMGenerator(renderer), bg = pm.fromEquirectangular(hdr).texture, env = pm.fromScene(new RoomEnvironment(renderer), 0.03).texture;
+    for (const k in scenes3d) { const S = scenes3d[k]; S.env = env; S.bg = bg; S.scene.environment = env; if (!S.ir) S.scene.background = bg; S.scene.backgroundBlurriness = 0.55; S.scene.backgroundIntensity = 0.55; S.scene.environmentIntensity = 0.72; }
+    $$(".loading").forEach(l => l.remove()); window.heatLabReady = true;
+  }, undefined, () => { $$(".loading").forEach(l => { l.textContent = "Could not load the studio lighting (assets/). Serve the folder over http."; }); });
+  let last = performance.now();
+  renderer.setAnimationLoop(now => {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const S = scenes3d[active]; if (!S || document.hidden) return;
+    S.update(dt, now); S.updateTherm(); S.controls.update(); renderer.render(S.scene, S.camera); S.overlay();
+  });
+} else {
+  ["chip", "touch", "cup"].forEach(k => { scenes3d[k] = null; });
 }
 
-/* ======================================================= 1 COOL THE CHIP */
-scenes.chip = (() => {
-  const LIST = ["cu", "al", "aln", "alumina", "glass", "plastic"];
-  const st = { mat: "aln", X: 2 };
-  $("#chipTiles").innerHTML = LIST.map(k => '<button class="tile" data-m="' + k + '"><i style="background:' + MATS[k].col + '"></i><span>' + MATS[k].name + '<small>λ ' + num(MATS[k].lam, 3) + '</small></span></button>').join("");
-  $("#chipTiles").addEventListener("click", e => { const b = e.target.closest(".tile"); if (b) set({ mat: b.dataset.m }); });
-  $("#chipX").addEventListener("input", e => set({ X: +e.target.value }));
-  const dots = Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random(), v: 0.25 + Math.random() * 0.2 }));
-  const smoke = Array.from({ length: 14 }, (_, i) => ({ p: i / 14, x: Math.random() - 0.5 }));
-  let last = 0;
-  function set(p) {
-    Object.assign(st, p);
-    $("#chipX").value = st.X; $("#chipXo").textContent = st.X.toFixed(1) + " mm";
-    $$("#chipTiles .tile").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === st.mat ? "true" : "false"));
-    if (lessons.chip) lessons.chip.check();
-  }
-  function draw(now) {
-    const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now;
-    const { ctx, W, H } = fit($("#cvChip")), c = pal(), m = MATS[st.mat], Tc = chipT(m, st.X);
-    const narrow = W < 860, cx = narrow ? W / 2 : 430 + (W - 430) / 2, s = clamp(Math.min((narrow ? W : W - 430) / 760, H / 620), 0.55, 1.5);
-    const plateW = Math.min((narrow ? W : W - 460) * 0.9, 680 * s), plateH = (16 + st.X * 22) * s;
-    const coolH = 54 * s, groupH = 260 * s + plateH + coolH, baseY = Math.min(H - 30 * s, (H + groupH) / 2) - coolH, plateY = baseY - plateH;
-    const chipW = 170 * s, chipH = 44 * s, chipY = plateY - chipH - 4 * s;
-    // cold block with fins
-    ctx.fillStyle = "#5b8fc7"; rr(ctx, cx - plateW / 2 - 12 * s, baseY, plateW + 24 * s, coolH, 8 * s); ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 3 * s;
-    for (let x = cx - plateW / 2; x < cx + plateW / 2; x += 22 * s) { ctx.beginPath(); ctx.moveTo(x, baseY + 10 * s); ctx.lineTo(x, baseY + coolH - 10 * s); ctx.stroke(); }
-    label(ctx, "❄ cooled to 30 °C", cx, baseY + coolH / 2, B(700, 17 * s), "#fff", "#4877ad", 6);
-    // plate, hot under the chip
-    ctx.fillStyle = m.col; rr(ctx, cx - plateW / 2, plateY, plateW, plateH, 6 * s); ctx.fill();
-    const g = ctx.createLinearGradient(0, plateY, 0, plateY + plateH); g.addColorStop(0, tColor(Tc, .95)); g.addColorStop(1, tColor(30, 0));
-    ctx.fillStyle = g; ctx.fillRect(cx - chipW / 2, plateY, chipW, plateH);
-    ctx.strokeStyle = "rgba(0,0,0,.35)"; ctx.lineWidth = 1.5; rr(ctx, cx - plateW / 2, plateY, plateW, plateH, 6 * s); ctx.stroke();
-    ctx.fillStyle = "rgba(20,25,30,.8)"; ctx.font = B(700, 16 * s); ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    ctx.fillText((m.long || m.name) + " plate", cx - plateW / 2 + 12 * s, plateY + plateH / 2);
-    // heat flowing down
-    ctx.fillStyle = "rgba(255,255,255,.9)";
-    dots.forEach(d => { d.y += d.v * dt; if (d.y > 1) { d.y -= 1; d.x = Math.random(); } ctx.beginPath(); ctx.arc(cx - chipW / 2 + 10 * s + d.x * (chipW - 20 * s), plateY + d.y * plateH, 2.6 * s, 0, 7); ctx.fill(); });
-    // chip
-    ctx.fillStyle = "#c9a227"; for (let k = 0; k < 6; k++) { const px = cx - chipW / 2 + 14 * s + k * (chipW - 28 * s) / 5; ctx.fillRect(px - 5 * s, chipY + chipH - 2, 10 * s, 7 * s); }
-    ctx.fillStyle = "#23272e"; rr(ctx, cx - chipW / 2, chipY, chipW, chipH, 8 * s); ctx.fill();
-    ctx.fillStyle = tColor(Tc); rr(ctx, cx - chipW / 2 + 12 * s, chipY + 9 * s, chipW - 24 * s, chipH - 18 * s, 5 * s); ctx.fill();
-    // effects: sparks for metals, smoke when too hot
-    if (m.elec) {
-      ctx.strokeStyle = "#ffd23f"; ctx.lineWidth = 4 * s; ctx.shadowColor = "#ffd23f"; ctx.shadowBlur = 14 * s;
-      for (let b = 0; b < 2; b++) {
-        ctx.beginPath(); const x0 = cx - chipW / 2 + 14 * s, x1 = cx + chipW / 2 - 14 * s, n = 9; ctx.moveTo(x0, plateY + 3 * s);
-        for (let k = 1; k < n; k++) ctx.lineTo(x0 + (x1 - x0) * k / n, plateY + 3 * s + Math.random() * 16 * s); ctx.lineTo(x1, plateY + 3 * s); ctx.stroke();
-      }
-      ctx.shadowBlur = 0;
-    } else if (Tc > 150) {
-      smoke.forEach(p => { p.p += dt * 0.35; if (p.p > 1) { p.p -= 1; p.x = Math.random() - 0.5; } const y = chipY - p.p * 130 * s, r = (10 + p.p * 24) * s;
-        ctx.fillStyle = "rgba(110,110,115," + (0.45 * (1 - p.p)) + ")"; ctx.beginPath(); ctx.arc(cx + p.x * chipW * 0.6 + Math.sin(p.p * 6) * 10 * s, y, r, 0, 7); ctx.fill(); });
-    }
-    // big readout
-    const big = Tc > 999 ? "> 1000 °C" : Math.round(Tc) + " °C", ry = Math.max(chipY - 150 * s, 60 * s);
-    ctx.font = F(900, 84 * s); ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillStyle = m.elec ? c.muted : Tc <= 150 ? c.good : c.accent; ctx.fillText(m.elec ? "⚡ short!" : big, cx, ry);
-    const badge = m.elec ? "Metals carry current: the chip shorts out" : Tc <= 150 ? "✓ The chip is safe" : "🔥 The chip overheats";
-    label(ctx, badge, cx, ry + 66 * s, F(800, 22 * s), "#fff", m.elec ? "#9a6c00" : Tc <= 150 ? "#2f7d4a" : "#a51c30", 10 * s);
-    ctx.fillStyle = c.muted; ctx.font = B(700, 16 * s); ctx.textAlign = "center"; ctx.fillText("10 W chip on 1 mm²", cx, chipY - 18 * s);
-  }
-  set({});
-  return { draw, set, st, animated: true };
-})();
-
-/* ======================================================= 2 TOUCH TEST */
-scenes.touch = (() => {
-  const LIST = ["cu", "al", "steel", "stone", "glass", "plastic", "wood", "foam"].sort((a, b) => MATS[b].e - MATS[a].e);
-  const st = { T: 0 };
-  $("#touchT").addEventListener("input", e => set({ T: +e.target.value }));
-  $$("#s-touch .pill").forEach(b => b.addEventListener("click", () => set({ T: +b.dataset.t })));
-  function set(p) {
-    Object.assign(st, p);
-    $("#touchT").value = st.T; $("#touchTo").textContent = deg(st.T);
-    $$("#s-touch .pill").forEach(b => b.setAttribute("aria-pressed", +b.dataset.t === st.T ? "true" : "false"));
-    draw(); if (lessons.touch) lessons.touch.check();
-  }
-  const feel = T => T < 12 ? ["Freezing!", "#2b62b0"] : T < 26 ? ["Cold", "#3f86c6"] : T < 38 ? ["Neutral", "#6b7480"] : T < 44 ? ["Warm", "#c27a16"] : ["Burns!", "#b3122b"];
-  function draw() {
-    const { ctx, W, H } = fit($("#cvTouch")), c = pal();
-    const narrow = W < 860, cols = 4, rows = 2;
-    const left = narrow ? 0 : 430, top = narrow ? 16 : Math.min(120, H * 0.17), padX = 12;
-    const cellW = (W - left - 2 * padX) / cols, cellH = (H - top - 14) / rows;
-    const s = clamp(Math.min(cellW / 190, cellH / 260), 0.45, 1.6);
-    if (!narrow) {
-      ctx.fillStyle = c.ink; ctx.font = F(900, 32); ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText("All at " + deg(st.T) + ". What does your finger feel?", left + (W - left) / 2, top * 0.42);
-      ctx.fillStyle = c.muted; ctx.font = B(700, 18); ctx.fillText("Your finger is at 33 °C", left + (W - left) / 2, top * 0.42 + 34);
-    }
-    LIST.forEach((k, i) => {
-      const m = MATS[k], col = i % cols, row = Math.floor(i / cols), x = left + padX + col * cellW + cellW / 2, y0 = top + row * cellH;
-      const bw = Math.min(cellW * 0.8, 140 * s), bh = Math.min(cellH * 0.24, 110 * s), by = y0 + cellH - bh - 40 * s;
-      const flen = clamp(by - y0 - 110 * s, 30 * s, 110 * s), ry = by - flen - 50 * s;
-      const Tf = contactT(m, st.T), [word, wc] = feel(Tf);
-      ctx.fillStyle = m.col; rr(ctx, x - bw / 2, by, bw, bh, 10 * s); ctx.fill();
-      ctx.fillStyle = tColor(st.T, .3); rr(ctx, x - bw / 2, by, bw, bh, 10 * s); ctx.fill();
-      ctx.strokeStyle = "rgba(0,0,0,.25)"; ctx.lineWidth = 1.5; rr(ctx, x - bw / 2, by, bw, bh, 10 * s); ctx.stroke();
-      ctx.fillStyle = c.ink; ctx.font = F(800, 19 * s + 3); ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText(m.name, x, by + bh + 10 * s);
-      ctx.save(); ctx.translate(x, by + 2); ctx.rotate(Math.PI / 2); finger(ctx, flen, 38 * s, tColor(Tf, 0.95)); ctx.restore();
-      ctx.fillStyle = wc; ctx.font = F(900, 34 * s + 4); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(deg(Tf), x, ry);
-      ctx.font = F(800, 16 * s + 2); ctx.fillText(word, x, ry + 32 * s);
-    });
-  }
-  set({});
-  return { draw, set, st, animated: false };
-})();
-
-/* ======================================================= 3 HOT-CUP RACE */
-scenes.cup = (() => {
-  const LIST = ["cu", "steel", "glass", "plastic"];
-  const st = { w: 3, t: 0, running: false, poured: false };
-  let t0 = 0, lt0 = -2, lt1 = 2;
-  $("#cupGo").addEventListener("click", () => pour());
-  $("#cupW").addEventListener("input", e => set({ w: +e.target.value, t: 0, running: false, poured: false }));
-  function set(p) { Object.assign(st, p); $("#cupW").value = st.w; $("#cupWo").textContent = num(st.w, 2) + " mm"; if (!st.poured) $("#cupGo").textContent = "☕ Pour boiling water"; draw(performance.now()); if (lessons.cup) lessons.cup.check(); }
-  const results = () => LIST.map(k => ({ k, t: cupOuchTime(MATS[k], st.w) }));
-  function pour() {
-    lt0 = -2; lt1 = Math.log10(Math.min(900, Math.max(...results().map(r => r.t)) * 1.5));
-    st.poured = true; st.running = true; st.t = 0; t0 = performance.now(); $("#cupGo").textContent = "☕ Pour again";
-  }
-  const steam = Array.from({ length: 10 }, (_, i) => ({ p: i / 10, x: Math.random() }));
-  let last = 0;
-  function draw(now) {
-    const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now;
-    if (st.running) {
-      const f = Math.min(1, (now - t0) / 8000);
-      st.t = Math.pow(10, lt0 + f * (lt1 - lt0));
-      if (f >= 1) { st.running = false; if (lessons.cup) lessons.cup.check(); }
-    }
-    const { ctx, W, H } = fit($("#cvCup")), c = pal();
-    const narrow = W < 860, cols = narrow ? 2 : 4, rows = narrow ? 2 : 1;
-    const left = narrow ? 0 : 430, top = narrow ? 84 : Math.min(170, H * 0.26);
-    const cellW = (W - left - 24) / cols, cellH = (H - top - 12) / rows;
-    const s = clamp(Math.min(cellW / 250, cellH / 300), 0.42, 1.5);
-    const cxw = left + (W - left) / 2;
-    ctx.fillStyle = c.ink; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.font = F(900, narrow ? 38 : 58); ctx.fillText(st.poured ? "⏱ " + fmtTime(st.t) : "4 cups, 20 °C", cxw, top * 0.4);
-    ctx.fillStyle = c.muted; ctx.font = B(700, narrow ? 15 : 19);
-    ctx.fillText(st.poured ? (st.running ? "time-lapse: the clock speeds up" : "Which cup could you hold longest?") : "Pour boiling water into all four at once", cxw, top * 0.4 + (narrow ? 30 : 44));
-    const R = results(), best = R.reduce((a, b) => (b.t > a.t ? b : a));
-    LIST.forEach((k, i) => {
-      const m = MATS[k], col = i % cols, row = Math.floor(i / cols), y0 = top + row * cellH, tw = (6 + st.w * 4.2) * s, fl = 54 * s;
-      const cw = Math.min(cellW - 2 * tw - fl - 40 * s, 150 * s), ch = clamp(cellH - tw - 150 * s, 60 * s, cw * 2.4);
-      const x = left + 12 + col * cellW + (cellW - (cw + 2 * tw + fl + 18 * s)) / 2 + tw + cw / 2, by = y0 + cellH - tw - 70 * s, ty = by - ch;
-      const Fo = st.poured ? st.t * m.a / ((st.w / 1000) ** 2) : 0, T = xi => st.poured ? CUP.T0 + (CUP.Thot - CUP.T0) * slabTheta(xi, Fo) : CUP.T0;
-      const Tout = T(1), ouch = st.poured && st.t >= R[i].t;
-      const grad = (x0, y0g, x1, y1g) => { const g = ctx.createLinearGradient(x0, y0g, x1, y1g); for (let j = 0; j <= 8; j++) g.addColorStop(j / 8, tColor(T(j / 8))); return g; };
-      ctx.fillStyle = grad(x - cw / 2, 0, x - cw / 2 - tw, 0); ctx.fillRect(x - cw / 2 - tw, ty, tw, ch + tw);
-      ctx.fillStyle = grad(x + cw / 2, 0, x + cw / 2 + tw, 0); ctx.fillRect(x + cw / 2, ty, tw, ch + tw);
-      ctx.fillStyle = grad(0, by, 0, by + tw); ctx.fillRect(x - cw / 2, by, cw, tw);
-      ctx.strokeStyle = m.col; ctx.lineWidth = 4 * s; ctx.beginPath(); ctx.moveTo(x - cw / 2 - tw, ty); ctx.lineTo(x - cw / 2 - tw, by + tw); ctx.lineTo(x + cw / 2 + tw, by + tw); ctx.lineTo(x + cw / 2 + tw, ty); ctx.stroke();
-      if (st.poured) {
-        ctx.fillStyle = "rgba(196,92,52,.88)"; ctx.fillRect(x - cw / 2, ty + 18 * s, cw, ch - 18 * s);
-        steam.forEach(p => { if (i === 0) { p.p += dt * 0.25; if (p.p > 1) { p.p -= 1; p.x = Math.random(); } } ctx.fillStyle = "rgba(160,170,180," + 0.35 * (1 - p.p) + ")"; ctx.beginPath(); ctx.arc(x - cw / 2 + p.x * cw + Math.sin(p.p * 7) * 8 * s, ty + 10 * s - p.p * 60 * s, (5 + p.p * 12) * s, 0, 7); ctx.fill(); });
-      }
-      const fx = x + cw / 2 + tw + (ouch ? 18 * s : 0), fy = ty + ch * 0.55;
-      ctx.save(); ctx.translate(fx, fy); ctx.rotate(Math.PI); finger(ctx, fl, 26 * s, ouch ? "rgba(230,30,40,.9)" : tColor(Tout, .6)); ctx.restore();
-      if (ouch) label(ctx, "Ouch!", fx + fl / 2, fy - 34 * s, F(900, 18 * s + 2), "#fff", "#b3122b", 6);
-      ctx.fillStyle = c.ink; ctx.font = F(800, 20 * s + 3); ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText(m.name, x, by + tw + 10 * s);
-      const fin = !st.running && st.poured, res = ouch ? "held " + fmtTime(R[i].t) + (fin && k === best.k ? " 🏆" : "") : st.poured ? Math.round(Tout) + " °C outside" : "";
-      ctx.fillStyle = ouch ? (fin && k === best.k ? c.good : c.accent) : c.muted; ctx.font = F(800, 17 * s + 3); ctx.fillText(res, x, by + tw + 38 * s);
-    });
-  }
-  set({});
-  return { draw, set, st, pour, results, animated: true };
-})();
-
-/* ======================================================= 4 PICK THE WALL (selection chart) */
-scenes.wall = (() => {
-  const LIST = ["cu", "al", "aln", "alumina", "steel", "ti", "stone", "concrete", "glass", "adobe", "brick", "aerated", "firebrick", "neoprene", "cork", "foam"];
-  const GOALS = {
-    months: { f: m => 1 / m.lam, ok: () => true, title: "Cold room for months: lowest λ wins", short: "Months: lowest λ" },
-    hour: { f: m => 1 / m.a, ok: m => m.a <= 0.02 * 0.02 / 7200, title: "Hold out 1 hour through 20 mm: lowest a wins", short: "1 hour: lowest a", con: "faded: the change would cross 20 mm within the hour" },
-    store: { f: m => m.lam / Math.sqrt(m.a), ok: m => m.a <= 3e-6, title: "Store the day's sun: highest λ/a½ wins", short: "Sun wall: highest λ/a½", con: "faded: heat would cross the wall too soon" },
-    kiln: { f: m => Math.sqrt(m.a) / m.lam, ok: m => m.tmax >= 1000, title: "Kiln wall at 1000 °C: highest a½/λ wins", short: "Kiln: highest a½/λ", con: "faded: melts or burns below 1000 °C" }
-  };
-  const st = { goal: "months", lM: null };
-  const XR = [-8.3, -3.6], YR = [-2, 3];
-  let geo = null, dragging = false;
-  $("#goalTiles").addEventListener("click", e => { const b = e.target.closest(".pill"); if (b) set({ goal: b.dataset.g, lM: null }); });
-  const cv = $("#cvWall");
-  const lmAt = (px, py) => { const la = geo.la(px), ll = geo.ll(py); return st.goal === "months" ? -ll : st.goal === "hour" ? -la : st.goal === "store" ? ll - la / 2 : la / 2 - ll; };
-  cv.addEventListener("pointerdown", e => { if (!geo) return; const r = cv.getBoundingClientRect(), x = e.clientX - r.left; if (x < geo.L) return; dragging = true; cv.setPointerCapture(e.pointerId); move(e); });
-  cv.addEventListener("pointermove", e => { if (dragging) move(e); });
-  cv.addEventListener("pointerup", () => { dragging = false; });
-  function move(e) { const r = cv.getBoundingClientRect(); set({ lM: lmAt(e.clientX - r.left, e.clientY - r.top) }); }
-  function ranked() { const G = GOALS[st.goal]; return LIST.filter(k => G.ok(MATS[k])).sort((a, b) => G.f(MATS[b]) - G.f(MATS[a])); }
-  function defaultLM() { const G = GOALS[st.goal], r = ranked().map(k => Math.log10(G.f(MATS[k]))); return r.length > 3 ? (r[2] + r[3]) / 2 : r[r.length - 1] - 0.15; }
-  function set(p) {
-    Object.assign(st, p); if (st.lM == null) st.lM = defaultLM();
-    $$("#goalTiles .pill").forEach(b => b.setAttribute("aria-pressed", b.dataset.g === st.goal ? "true" : "false"));
-    draw(); if (lessons.wall) lessons.wall.check();
-  }
-  function winners() { const G = GOALS[st.goal]; return ranked().filter(k => Math.log10(G.f(MATS[k])) >= st.lM - 1e-9).slice(0, 3); }
-  function draw() {
-    const { ctx, W, H } = fit(cv), c = pal(), G = GOALS[st.goal], narrow = W < 860;
-    const L = narrow ? 40 : 460, R = W - 20, T = narrow ? 60 : 84, Bt = H - 46;
-    const X = la => L + (la - XR[0]) / (XR[1] - XR[0]) * (R - L), Y = ll => Bt - (ll - YR[0]) / (YR[1] - YR[0]) * (Bt - T);
-    geo = { L, la: px => XR[0] + (px - L) / (R - L) * (XR[1] - XR[0]), ll: py => YR[0] + (Bt - py) / (Bt - T) * (YR[1] - YR[0]) };
-    ctx.fillStyle = c.ink; ctx.font = F(900, narrow ? 19 : 28); ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(narrow ? G.short : G.title, L, T - (narrow ? 30 : 44));
-    ctx.save(); ctx.beginPath(); ctx.rect(L, T, R - L, Bt - T); ctx.clip();
-    ctx.fillStyle = c.panel; ctx.globalAlpha = .55; ctx.fillRect(L, T, R - L, Bt - T); ctx.globalAlpha = 1;
-    ctx.strokeStyle = c.rule; ctx.lineWidth = 1;
-    for (let e = Math.ceil(XR[0]); e <= XR[1]; e++) { ctx.beginPath(); ctx.moveTo(X(e), T); ctx.lineTo(X(e), Bt); ctx.stroke(); }
-    for (let e = YR[0]; e <= YR[1]; e++) { ctx.beginPath(); ctx.moveTo(L, Y(e)); ctx.lineTo(R, Y(e)); ctx.stroke(); }
-    const lM = st.lM; ctx.fillStyle = "rgba(47,125,74,.13)"; ctx.strokeStyle = c.accent; ctx.lineWidth = 4;
-    const poly = pts => { ctx.beginPath(); pts.forEach(([x, y], j) => j ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); };
-    let p0, p1;
-    if (st.goal === "months") { const y = Y(-lM); poly([[L, y], [R, y], [R, Bt], [L, Bt]]); p0 = [L, y]; p1 = [R, y]; }
-    else if (st.goal === "hour") { const x = X(-lM); poly([[L, T], [x, T], [x, Bt], [L, Bt]]); p0 = [x, T]; p1 = [x, Bt]; }
-    else { const f = st.goal === "store" ? la => lM + la / 2 : la => la / 2 - lM; p0 = [X(XR[0]), Y(f(XR[0]))]; p1 = [X(XR[1]), Y(f(XR[1]))]; poly(st.goal === "store" ? [p0, p1, [R, T - 4000], [L, T - 4000]] : [p0, p1, [R, Bt + 4000], [L, Bt + 4000]]); }
-    ctx.beginPath(); ctx.moveTo(...p0); ctx.lineTo(...p1); ctx.stroke();
-    ctx.restore();
-    const win = winners(), medal = ["🥇", "🥈", "🥉"], placed = [], tags = [];
-    LIST.forEach(k => {
-      const m = MATS[k], x = X(Math.log10(m.a)), y = Y(Math.log10(m.lam)), ok = G.ok(m), wi = win.indexOf(k);
-      ctx.globalAlpha = ok ? 1 : 0.2;
-      ctx.fillStyle = m.col; ctx.strokeStyle = "rgba(0,0,0,.55)"; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(x, y, wi >= 0 ? 13 : 8, 0, 7); ctx.fill(); ctx.stroke();
-      if (wi >= 0) tags.push({ k, m, x, y, wi });
-      else if (!narrow) {
-        ctx.fillStyle = c.muted; ctx.font = B(700, 15); ctx.textBaseline = "middle";
-        const nm = m.long || m.name, tw = ctx.measureText(nm).width, flip = k === "brick" || x + 12 + tw > R - 4;
-        ctx.textAlign = flip ? "right" : "left"; ctx.fillText(nm, flip ? x - 12 : x + 12, y);
-      }
-      ctx.globalAlpha = 1;
-    });
-    // medal labels: right of the dot, else left, else shifted up/down with a leader line; never on another label
-    tags.sort((a, b) => a.wi - b.wi).forEach(({ m, x, y, wi }) => {
-      ctx.font = F(900, narrow ? 15 : 19); ctx.textAlign = "left"; ctx.textBaseline = "middle";
-      const txt = medal[wi] + " " + (narrow ? m.name : (m.long || m.name)) + (st.goal === "store" && m.cost ? "  $" + (m.costTxt || m.cost.toLocaleString("en-US")) + "/m³" : "");
-      const tw = ctx.measureText(txt).width, hit = (lx, ly) => lx < L + 2 || lx + tw > R - 2 || placed.some(p => Math.abs(p.y - ly) < 34 && lx < p.x + p.w + 14 && p.x < lx + tw + 14) || tags.some(t => t.x !== x && Math.abs(t.y - ly) < 18 && t.x > lx - 16 && t.x < lx + tw + 16);
-      const cands = [[x + 20, y], [x - 20 - tw, y]];
-      for (const d of [38, -38, 72, -72, 106, -106]) cands.push([x + 20, y + d], [x - 20 - tw, y + d]);
-      const [lx, ly] = cands.find(([a, b]) => !hit(a, b)) || cands[0];
-      placed.push({ x: lx, y: ly, w: tw });
-      if (ly !== y) { ctx.strokeStyle = c.ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(lx < x ? lx + tw + 6 : lx - 6, ly); ctx.stroke(); }
-      ctx.fillStyle = c.panel; rr(ctx, lx - 6, ly - 16, tw + 12, 32, 8); ctx.fill();
-      ctx.strokeStyle = c.rule; ctx.lineWidth = 1; rr(ctx, lx - 6, ly - 16, tw + 12, 32, 8); ctx.stroke();
-      ctx.fillStyle = c.ink; ctx.fillText(txt, lx, ly);
-    });
-    ctx.strokeStyle = c.ink; ctx.lineWidth = 1.4; ctx.strokeRect(L, T, R - L, Bt - T);
-    ctx.fillStyle = c.muted; ctx.font = B(700, 16); ctx.textAlign = "center"; ctx.textBaseline = "top";
-    ctx.fillText("diffusivity a →  (how fast a change spreads)", (L + R) / 2, Bt + 12);
-    ctx.save(); ctx.translate(L - 12, (T + Bt) / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = "bottom"; ctx.fillText("conductivity λ →", 0, 0); ctx.restore();
-    if (!narrow) label(ctx, "drag to move the line", R - 100, Bt - 22, B(700, 15), c.muted, c.soft, 7);
-    if (G.con && !narrow) { ctx.fillStyle = c.muted; ctx.font = B(700, 15); ctx.textAlign = "right"; ctx.textBaseline = "top"; ctx.fillText(G.con, R - 10, T + 10); }
-  }
-  set({});
-  return { draw, set, st, winners, animated: false };
-})();
-
-/* ======================================================= lessons */
 lesson("chip", [
-  { kind: "predict", q: "Copper carries heat better than anything here. Will a copper plate keep the chip safe?", opts: ["Yes, best conductor", "No"], ok: 1,
-    setup: () => scenes.chip.set({ mat: "aln", X: 2 }), after: () => scenes.chip.set({ mat: "cu" }),
-    reveal: "No. Copper also carries electric current, so the chip shorts out. Step 1: screen out every metal." },
+  { kind: "predict", q: "Copper carries heat better than anything here. Will a copper substrate keep the chip safe?", opts: ["Yes, best conductor", "No"], ok: 1,
+    setup: () => scenes3d.chip && scenes3d.chip.set({ mat: "aln", X: 2 }), after: () => scenes3d.chip && scenes3d.chip.set({ mat: "cu" }),
+    reveal: "No. The bond wires and pads carry current, and a copper substrate connects them: the chip shorts out. Step 1: screen out every metal." },
   { kind: "predict", q: "Two ceramics pass the screen. Which keeps the chip cooler?", opts: ["Alumina (λ 33)", "AlN (λ 170)"], ok: 1,
-    setup: () => scenes.chip.set({ mat: "alumina", X: 2 }), after: () => scenes.chip.set({ mat: "aln" }),
-    reveal: "AlN: about 150 °C. On alumina the chip reaches about 640 °C. Step 2: rank on λ." },
-  { kind: "try", q: "Get the chip below 100 °C.", goal: () => { const m = MATS[scenes.chip.st.mat]; return !m.elec && chipT(m, scenes.chip.st.X) < 100; }, done: "AlN on a thinner plate: less thickness, smaller temperature drop." },
-  { kind: "idea", q: "Steady heat flow needs a temperature drop.", eq: "ΔT = q · X / λ", eqw: "heat flux × thickness ÷ conductivity", text: "Screen first (no current), then pick the highest λ and keep the plate thin." }
+    setup: () => scenes3d.chip && scenes3d.chip.set({ mat: "alumina", X: 2 }), after: () => scenes3d.chip && scenes3d.chip.set({ mat: "aln" }),
+    reveal: "AlN: about 150 °C. On alumina the chip reaches about 640 °C. Step 2: rank on λ. Try the thermal camera." },
+  { kind: "try", q: "Get the chip below 100 °C.", goal: () => { const s = scenes3d.chip.st, m = MATS[s.mat]; return !m.elec && chipT(m, s.X) < 100; }, done: "AlN, made thinner: less thickness, smaller temperature drop." },
+  { kind: "idea", q: "Steady heat flow needs a temperature drop.", eq: "ΔT = q · X / λ", eqw: "heat flux × thickness ÷ conductivity", text: "Screen first (no current), then pick the highest λ and keep the substrate thin. Power modules use AlN for exactly this." }
 ]);
 lesson("touch", [
   { kind: "predict", q: "A steel bench and a wooden bench sat outside at 0 °C all night. Which feels colder?", opts: ["Steel", "Wood", "Same: both are 0 °C"], ok: 0,
-    setup: () => scenes.touch.set({ T: 0 }), reveal: "Steel. Your finger feels about 4 °C on steel, about 26 °C on wood." },
-  { kind: "predict", q: "A sauna is at 80 °C. Which bench can you sit on?", opts: ["Steel", "Stone", "Wood"], ok: 2,
-    setup: () => scenes.touch.set({ T: 80 }), reveal: "Wood: it feels about 43 °C. Stone feels about 66 °C and steel about 74 °C: both burn." },
-  { kind: "try", q: "Find the temperature where steel and wood feel the same.", goal: () => Math.abs(scenes.touch.st.T - 33) <= 1, done: "33 °C, your own skin temperature: no heat flows either way." },
-  { kind: "idea", q: "You feel the contact temperature, not the material's.", eq: "pull ∝ √(λρCₚ)", eqw: "conducts well × stores a lot", text: "Metals and stone drag your skin to their own temperature; wood and foam hardly do. This same group, λ/a½, picks the sun wall on the chart." }
+    setup: () => scenes3d.touch && scenes3d.touch.set({ T: 0, mat: "wood" }), after: () => scenes3d.touch && scenes3d.touch.set({ mat: "steel" }),
+    reveal: "Steel: your fingertip drops to about 4 °C. On wood it stays near 26 °C. The tiles below list every material." },
+  { kind: "predict", q: "A sauna is at 80 °C. Which bench can you sit on?", opts: ["Steel", "Granite", "Pine wood"], ok: 2,
+    setup: () => scenes3d.touch && scenes3d.touch.set({ T: 80, mat: "steel" }), after: () => scenes3d.touch && scenes3d.touch.set({ mat: "wood" }),
+    reveal: "Wood: it feels about 43 °C. Granite feels about 66 °C and steel about 74 °C: both burn." },
+  { kind: "try", q: "Find the temperature where steel and wood feel the same. Then switch on the thermal camera.", goal: () => Math.abs(scenes3d.touch.st.T - 33) <= 1, done: "33 °C, your own skin temperature: no heat flows either way." },
+  { kind: "idea", q: "You feel the contact temperature, not the material's.", eq: "pull ∝ √(λρCₚ)", eqw: "conducts well × stores a lot", text: "Metals and stone drag your skin to their own temperature; wood and foam hardly do. The camera sees the block's true temperature; your finger does not." }
 ]);
 lesson("cup", [
-  { kind: "predict", q: "Boiling water goes into a glass with a 3 mm wall. How long until it is too hot to hold?", opts: ["About 1 s", "About 10 s", "About 1 min"], ok: 1,
-    setup: () => scenes.cup.set({ w: 3, t: 0, running: false, poured: false }), after: () => scenes.cup.pour(),
+  { kind: "predict", q: "Boiling tea goes into a glass with a 3 mm wall. How long until it is too hot to hold?", opts: ["About 1 s", "About 10 s", "About 1 min"], ok: 1,
+    setup: () => scenes3d.cup && scenes3d.cup.set({ w: 3, t: 0, phase: "empty" }), after: () => scenes3d.cup && scenes3d.cup.pour(),
     reveal: "About 6 s. Quick estimate: x²/2a = (0.003)² / (2 × 5.6 × 10⁻⁷) ≈ 8 s." },
   { kind: "predict", q: "Make every wall twice as thick: 6 mm. How much longer can you hold the glass?", opts: ["2 times", "4 times", "8 times"], ok: 1,
-    setup: () => scenes.cup.set({ w: 6, t: 0, running: false, poured: false }), after: () => scenes.cup.pour(),
+    setup: () => scenes3d.cup && scenes3d.cup.set({ w: 6, t: 0, phase: "empty" }), after: () => scenes3d.cup && scenes3d.cup.pour(),
     reveal: "4 times: about 24 s. The time grows with the thickness squared." },
-  { kind: "try", q: "Pick a wall thickness where one cup can be held for a full minute, then pour.", goal: () => !scenes.cup.st.running && scenes.cup.st.poured && scenes.cup.results().some(r => r.t >= 60), done: "Plastic at about 3.5 mm or more: it has the lowest diffusivity." },
-  { kind: "idea", q: "A temperature change creeps through a wall.", eq: "t ≈ x² / 2a", eqw: "a = λ / ρCₚ, the diffusivity", text: "Low a: slow. Copper's a is about 1,700 times plastic's, so the heat is through in a blink." }
+  { kind: "try", q: "Pick a wall thickness where one cup can be held for a full minute, then pour.", goal: () => scenes3d.cup.st.phase === "done" && scenes3d.cup.results().some(r => r.t >= 60), done: "Polypropylene at about 3.5 mm or more: it has the lowest diffusivity." },
+  { kind: "idea", q: "A temperature change creeps through a wall.", eq: "t ≈ x² / 2a", eqw: "a = λ / ρCₚ, the diffusivity", text: "Low a: slow. Copper's a is about 1,700 times polypropylene's, so the heat is through in a blink." }
 ]);
 lesson("wall", [
-  { kind: "predict", q: "A cold room runs for months. Which wins: lowest λ (bottom) or lowest a (left)?", opts: ["Lowest λ: foam", "Lowest a: rubber"], ok: 0,
-    setup: () => scenes.wall.set({ goal: "months", lM: null }), reveal: "Lowest λ. Once steady, the leak is λΔT/w. Foam and cork win." },
-  { kind: "predict", q: "A radio beacon must hold out 1 hour behind a 20 mm wall. Foam or solid rubber?", opts: ["Foam", "Solid rubber"], ok: 1,
-    setup: () => scenes.wall.set({ goal: "months", lM: null }), after: () => scenes.wall.set({ goal: "hour", lM: null }),
-    reveal: "Rubber: the lowest a. Foam stores almost no heat, so a change crosses it in minutes." },
-  { kind: "predict", q: "A sunny wall stores heat by day and gives it back at night. Titanium scores highest. What do builders use?", opts: ["Titanium", "Concrete", "Foam"], ok: 1,
-    setup: () => scenes.wall.set({ goal: "store", lM: null }), reveal: "Concrete: half titanium's score at a thousandth of the price ($200 against $200,000 per m³)." },
-  { kind: "predict", q: "Kiln wall at 1000 °C: foam has the best a½/λ. Why not use it?", opts: ["It melts or burns", "Too heavy", "Too expensive"], ok: 0,
-    setup: () => scenes.wall.set({ goal: "kiln", lM: null }), reveal: "It cannot survive 1000 °C. Porous refractory brick wins: low λ, and it soaks up little heat." },
+  { kind: "predict", q: "A cold room runs for months. Which wins: lowest λ (bottom) or lowest a (left)?", opts: ["Lowest λ: foam", "Lowest a: rubber"], ok: 0, setup: () => chart.set({ goal: "months", lM: null }), reveal: "Lowest λ. Once steady, the leak is λΔT/w. Foam and cork win." },
+  { kind: "predict", q: "A radio beacon must hold out 1 hour behind a 20 mm wall. Foam or solid rubber?", opts: ["Foam", "Solid rubber"], ok: 1, setup: () => chart.set({ goal: "months", lM: null }), after: () => chart.set({ goal: "hour", lM: null }), reveal: "Rubber: the lowest a. Foam stores almost no heat, so a change crosses it in minutes." },
+  { kind: "predict", q: "A sunny wall stores heat by day and gives it back at night. Titanium scores highest. What do builders use?", opts: ["Titanium", "Concrete", "Foam"], ok: 1, setup: () => chart.set({ goal: "store", lM: null }), reveal: "Concrete: half titanium's score at a thousandth of the price ($200 against $200,000 per m³)." },
+  { kind: "predict", q: "Kiln wall at 1000 °C: foam has the best a½/λ. Why not use it?", opts: ["It melts or burns", "Too heavy", "Too expensive"], ok: 0, setup: () => chart.set({ goal: "kiln", lM: null }), reveal: "It cannot survive 1000 °C. Porous refractory brick wins: low λ, and it soaks up little heat." },
   { kind: "idea", q: "One chart. The goal picks the line.", eq: "goal → index", eqw: "min λ · min a · max λ/a½ · max a½/λ", text: "Months: foam. One hour: rubber. Sun wall: concrete. Kiln: refractory brick." }
 ]);
-
-/* phones: the lesson card moves out of the scene, under the controls */
-function placeLessons() {
-  const narrow = matchMedia("(max-width: 860px)").matches;
-  $$(".scene").forEach(sc => { const l = $(".lesson", sc), target = narrow ? sc : $(".stage", sc); if (l.parentElement !== target) target.appendChild(l); });
-}
 placeLessons();
-window.addEventListener("resize", placeLessons);
-
-/* ======================================================= deep links: #chip, or #cup:2 for lesson step 2 */
-function fromHash() { const [n, k] = location.hash.replace("#", "").split(":"); show(scenes[n] ? n : "chip", k ? +k : 0); }
+window.heatLab = { scenes3d, chart, lessons, show };
+function fromHash() { const [n, k] = location.hash.replace("#", "").split(":"); show(order.includes(n) ? n : "chip", k ? +k : 0); }
 window.addEventListener("hashchange", fromHash);
 fromHash();
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => scenes[active].draw(performance.now()));
 </script>
